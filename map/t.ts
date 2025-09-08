@@ -1,4 +1,5 @@
-import L from "leaflet"
+/// <reference types="leaflet" />
+
 // esbuild t.ts --minify --outfile=j.js
 type point = [number, number]
 type line = point[]
