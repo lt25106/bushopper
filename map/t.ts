@@ -83,12 +83,8 @@ async function main() {
   const startMarker = L.circleMarker([startbusstop.location[1], startbusstop.location[0]], { color: "red" }).addTo(map)
   const endMarker = L.circleMarker([endbusstop.location[1], endbusstop.location[0]], { color: "red" }).addTo(map)
 
-  startMarker.bindPopup(`
-    <div>${startbusstop.name}<br>${showbuses(startbusstop.services)}</div>
-  `)
-  endMarker.bindPopup(`
-    <div>${endbusstop.name}<br>${showbuses(endbusstop.services)}</div>
-  `)
+  startMarker.bindPopup(`<div>${startbusstop.name}<br>${showbuses(startbusstop.services)}</div>`)
+  endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}</div>`)
 
   let routepath: L.GeoJSON
   let allowedmarkers = [startMarker, endMarker]
@@ -124,10 +120,8 @@ async function main() {
               location: stops.features.filter(feat => feat.id == busstopnum)[0].geometry.coordinates
             }
             const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color: color }).addTo(map)
-            busstopmarker.bindPopup(`
-              <div>${busstop.name}<br>${showbuses(busstop.services)}</div>
-            `)
-            busstopmarker.on("popupopen", attachButtonListeners)
+            busstopmarker.bindPopup(`${busstop.name}<br>${showbuses(busstop.services)}</div>`)
+            busstopmarker.on("popopen", attachButtonListeners)
             busstopmarker.on("popupopen", e => {
               allowedmarkers.push(e.target)
               map.eachLayer(layer => {
@@ -135,12 +129,18 @@ async function main() {
                 if (layer != e.target) layer.unbindPopup()
               })
 
-              const busroute = ((routepath.toGeoJSON() as GeoJSON.FeatureCollection).features[0].geometry as GeoJSON.MultiLineString).coordinates
-              const markercoords: [number, number] = [e.target.getLatLng().lng, e.target.getLatLng().lat]
-              const stopclosestPointOnLine = closestPointOnLine(busroute.flat() as [number, number][], markercoords)
-              const startclosestPointOnLine = closestPointOnLine(busroute.flat() as [number, number][], startbusstop.location)
-              const newroute = busroute[startclosestPointOnLine.segmentIndex]
-              console.log(newroute)
+              // const busroute = (
+              //   (routepath.toGeoJSON() as GeoJSON.FeatureCollection).features[0].geometry as GeoJSON.MultiLineString
+              // ).coordinates
+              // const markercoords: [number, number] = [e.target.getLatLng().lng, e.target.getLatLng().lat]
+              // const stopclosestPointOnLine = closestPointOnLine(busroute.flat() as [number, number][], markercoords)
+              // const startclosestPointOnLine = closestPointOnLine(
+              //   busroute.flat() as [number, number][],
+              //   startbusstop.location
+              // )
+              // const newroute = busroute[startclosestPointOnLine.segmentIndex]
+              // console.log(newroute)
+
             }) // end of popupopen
           } // end of if
         }) // end of foreach
