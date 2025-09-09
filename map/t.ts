@@ -7,7 +7,8 @@ type busstop = {
   number: string,
   location: point,
   name: string,
-  services: string[]
+  services: string[],
+  road: string
 }
 type routes = {
   type: "FeatureCollection",
@@ -63,13 +64,15 @@ async function main() {
     number: stops.features[startindex].id,
     location: stops.features[startindex].geometry.coordinates,
     name: stops.features[startindex].properties.name,
-    services: stops.features[startindex].properties.services
+    services: stops.features[startindex].properties.services,
+    road: stops.features[endindex].properties.road
   }
   const endbusstop: busstop = {
     number: stops.features[endindex].id,
     location: stops.features[endindex].geometry.coordinates,
     name: stops.features[endindex].properties.name,
-    services: stops.features[endindex].properties.services
+    services: stops.features[endindex].properties.services,
+    road: stops.features[endindex].properties.road
   }
 
   // console.log(startbusstop)
