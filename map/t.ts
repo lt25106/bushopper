@@ -132,22 +132,16 @@ async function main() {
             busstopmarker.on("popupopen", e => {
               allowedmarkers.push(e.target)
               map.eachLayer(layer => {
+                if (layer instanceof L.CircleMarker) {
+                  const layerdata = {
+                    location: [layer.getLatLng().lng,layer.getLatLng().lat]
+                  }
+                }
+              })
+              map.eachLayer(layer => {
                 if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
                 if (layer != e.target) layer.unbindPopup()
               })
-
-              // const busroute = (
-              //   (routepath.toGeoJSON() as GeoJSON.FeatureCollection).features[0].geometry as GeoJSON.MultiLineString
-              // ).coordinates
-              // const markercoords: [number, number] = [e.target.getLatLng().lng, e.target.getLatLng().lat]
-              // const stopclosestPointOnLine = closestPointOnLine(busroute.flat() as [number, number][], markercoords)
-              // const startclosestPointOnLine = closestPointOnLine(
-              //   busroute.flat() as [number, number][],
-              //   startbusstop.location
-              // )
-              // const newroute = busroute[startclosestPointOnLine.segmentIndex]
-              // console.log(newroute)
-
             }) // end of popupopen
           } // end of if
         }) // end of foreach
@@ -215,6 +209,27 @@ function closestPointOnLine(line: line, point: point) {
   }
 
   return { point: closest, segmentIndex }
+}
+
+function degreetokilometer(degree: number) {
+  return 6378 * Math.sqrt(2 * (1-Math.cos(degree*Math.PI/180)))
+} 
+
+function opposite(busstop1: minbusstop,busstop2: minbusstop) {
+  // console.log(stops.features[0])
+  
+  const stopcoords = [busstop1.location,busstop2.location]
+  const stoproad = [busstop1.road,busstop2.road]
+  // console.log(stopcoords[0],stopcoords[1])
+  // console.log(stoproad[0],stoproad[1])
+  
+  const diff = [stopcoords[0][0] - stopcoords[1][0],stopcoords[0][1] - stopcoords[1][1]]
+  // console.log(diff)
+  // console.log(degreetokilometer(diff[0]),degreetokilometer(diff[1]))
+  
+  const distance = Math.sqrt(degreetokilometer(diff[0]) ** 2 + degreetokilometer(diff[1]) ** 2)
+  
+  return (stoproad[0] == stoproad[1] && distance < 0.06)
 }
 
 main()

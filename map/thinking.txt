@@ -1,6 +1,2 @@
-open popup
-click on bus stop
-click on bus
-click on second bus stop
-click on second bus
-hide all other bus stops added from 1st bus stop
+find which index the bus stop is on
+show it
