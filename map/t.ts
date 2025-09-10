@@ -1,13 +1,17 @@
 /// <reference types="leaflet" />
 
-// esbuild t.ts --minify --outfile=j.js
+// esbuild t.ts --minify --outfile=j.js --watch
 type point = [number, number]
 type line = point[]
-type busstop = {
+type fullbusstop = {
   number: string,
   location: point,
   name: string,
   services: string[],
+  road: string
+}
+type minbusstop = {
+  location: point,
   road: string
 }
 type routes = {
@@ -60,14 +64,14 @@ async function main() {
   const startindex = Math.floor(Math.random() * stops["features"].length)
   const endindex = Math.floor(Math.random() * stops["features"].length)
 
-  const startbusstop: busstop = {
+  const startbusstop: fullbusstop = {
     number: stops.features[startindex].id,
     location: stops.features[startindex].geometry.coordinates,
     name: stops.features[startindex].properties.name,
     services: stops.features[startindex].properties.services,
-    road: stops.features[endindex].properties.road
+    road: stops.features[startindex].properties.road
   }
-  const endbusstop: busstop = {
+  const endbusstop: fullbusstop = {
     number: stops.features[endindex].id,
     location: stops.features[endindex].geometry.coordinates,
     name: stops.features[endindex].properties.name,
@@ -78,8 +82,8 @@ async function main() {
   // console.log(startbusstop)
   // console.log(endbusstop)
 
-  const repeatbuses = startbusstop.services.some(r => endbusstop.services.includes(r))
-  if (repeatbuses) location.reload()
+  const hasrepeatbuses = startbusstop.services.some(r => endbusstop.services.includes(r))
+  if (hasrepeatbuses) location.reload()
 
   const map = L.map('map').setView([1.3521, 103.8198], 12)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
@@ -124,7 +128,7 @@ async function main() {
             }
             const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color: color }).addTo(map)
             busstopmarker.bindPopup(`${busstop.name}<br>${showbuses(busstop.services)}</div>`)
-            busstopmarker.on("popopen", attachButtonListeners)
+            busstopmarker.on("popupopen", attachButtonListeners)
             busstopmarker.on("popupopen", e => {
               allowedmarkers.push(e.target)
               map.eachLayer(layer => {
