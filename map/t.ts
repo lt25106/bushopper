@@ -1,5 +1,4 @@
 /// <reference types="leaflet" />
-/// <reference types="@mapbox/polyline" />
 
 // esbuild t.ts --minify --outfile=j.js --watch
 type point = [number, number]
@@ -15,18 +14,25 @@ type minbusstop = {
   location: point,
   road: string
 }
-type minbusstop = {
-  location: point,
-  road: string
+type routes = {
+  type: "FeatureCollection",
+  features: {
+    type: "Feature",
+    properties: {
+      number: string,
+      pattern: number
+    },
+    geometry: {
+      type: "LineString",
+      coordinates: line
+    }
+  }[]
 }
 type services = {
   [servicenumber: string]: {
     name: string,
     routes: string[][]
   }
-}
-type routes = {
-  [key: string]: [string,string?]
 }
 type stops = {
   type: "FeatureCollection",
@@ -47,14 +53,14 @@ type stops = {
 }
 
 async function main() {
-  const routes: routes = await fetch("https://data.busrouter.sg/v1/routes.json").then(res => res.json())
+  const routes: routes = await fetch("https://data.busrouter.sg/v1/routes.geojson").then(res => res.json())
   const services: services = await fetch("https://data.busrouter.sg/v1/services.json").then(res => res.json())
   const stops: stops = await fetch("https://data.busrouter.sg/v1/stops.geojson").then(res => res.json())
-  
+
   // console.log(routes)   // routes data
   // console.log(services) // services data
   // console.log(stops)    // stops data
-  
+
   const startindex = Math.floor(Math.random() * stops["features"].length)
   const endindex = Math.floor(Math.random() * stops["features"].length)
 
@@ -72,7 +78,7 @@ async function main() {
     services: stops.features[endindex].properties.services,
     road: stops.features[endindex].properties.road
   }
-  
+
   // console.log(startbusstop)
   // console.log(endbusstop)
 
@@ -89,13 +95,13 @@ async function main() {
 
   let routepath: L.GeoJSON
   let allowedmarkers = [startMarker, endMarker]
-  
+
   startMarker.on("popupopen", attachButtonListeners)
   endMarker.on("popupopen", attachButtonListeners)
-  
+
   function attachButtonListeners() {
     const buttons = document.querySelectorAll("button")
-    
+
     buttons.forEach(button => {
       let triggeredbyclick: boolean
       const color = `hsl(${Math.random() * 360},100%,50%)`
@@ -173,35 +179,35 @@ function closestPointOnLine(line: line, point: point) {
   let closest
   let minDist = Infinity
   let segmentIndex = -1
-  
+
   for (let i = 0; i < line.length - 1; i++) {
     const [x1, y1] = line[i]
     const [x2, y2] = line[i + 1]
     const [px, py] = point
-    
+
     const vx = x2 - x1
     const vy = y2 - y1
     const wx = px - x1
     const wy = py - y1
-    
+
     let t = (wx * vx + wy * vy) / (vx * vx + vy * vy)
     if (t < 0) t = 0
     else if (t > 1) t = 1
-    
+
     const cx = x1 + t * vx
     const cy = y1 + t * vy
-    
+
     const dx = px - cx
     const dy = py - cy
     const dist = Math.sqrt(dx * dx + dy * dy)
-    
+
     if (dist < minDist) {
       minDist = dist
       closest = [cx, cy]
       segmentIndex = i
     }
   }
-  
+
   return { point: closest, segmentIndex }
 }
 
