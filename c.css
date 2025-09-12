@@ -12,6 +12,15 @@
 h1 {
   font-weight: normal;
 }
+footer {
+  position: absolute;
+  bottom: 0.25rem;
+  right: 50%;
+  translate: 50%;
+}
+a {
+  color: hsl(180, 59%, 53%);
+}
 
 /* body */
 body > div {
