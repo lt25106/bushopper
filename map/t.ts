@@ -53,9 +53,11 @@ type stops = {
 }
 
 async function main() {
-  const routes: routes = await fetch("https://data.busrouter.sg/v1/routes.geojson").then(res => res.json())
-  const services: services = await fetch("https://data.busrouter.sg/v1/services.json").then(res => res.json())
-  const stops: stops = await fetch("https://data.busrouter.sg/v1/stops.geojson").then(res => res.json())
+  const [routes, services, stops]: [routes,services,stops] = await Promise.all([
+    fetch("https://data.busrouter.sg/v1/routes.geojson").then(res => res.json()),
+    fetch("https://data.busrouter.sg/v1/services.json").then(res => res.json()),
+    fetch("https://data.busrouter.sg/v1/stops.geojson").then(res => res.json())
+  ])
 
   // console.log(routes)   // routes data
   // console.log(services) // services data
