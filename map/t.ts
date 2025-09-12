@@ -94,6 +94,7 @@ async function main() {
   endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}</div>`)
 
   let routepath: L.GeoJSON
+  let busnum: string
   let allowedmarkers = [startMarker, endMarker]
 
   startMarker.on("popupopen", attachButtonListeners)
@@ -107,6 +108,7 @@ async function main() {
       const color = `hsl(${Math.random() * 360},100%,50%)`
       button.addEventListener("mouseover", () => {
         routepath = L.geoJSON(getroutepath(button.textContent), { style: { color: color } }).addTo(map)
+        busnum = button.textContent
         triggeredbyclick = false
       })
       button.addEventListener("mouseout", () => {
@@ -116,8 +118,8 @@ async function main() {
         triggeredbyclick = true
 
         const busstops = services[button.textContent].routes[1]
-          ? services[button.textContent].routes[0].concat(services[button.textContent].routes[1])
-          : services[button.textContent].routes[0]
+        ? services[button.textContent].routes[0].concat(services[button.textContent].routes[1])
+        : services[button.textContent].routes[0]
 
         busstops.forEach((busstopnum: string) => {
           if (busstopnum != startbusstop.number && busstopnum != endbusstop.number) {
@@ -132,15 +134,16 @@ async function main() {
             busstopmarker.on("popupopen", e => {
               allowedmarkers.push(e.target)
               map.eachLayer(layer => {
-                if (layer instanceof L.CircleMarker) {
-                  const layerdata = {
-                    location: [layer.getLatLng().lng,layer.getLatLng().lat]
-                  }
-                }
-              })
-              map.eachLayer(layer => {
                 if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
                 if (layer != e.target) layer.unbindPopup()
+              })
+              map.eachLayer(layer => {
+                if (layer instanceof L.CircleMarker) {
+                  routepath.eachLayer(path => {
+                    console.log(<L.Polyline>path.getLatLngs())
+                  })
+                  const pointonline = closestPointOnLine(routepath,[layer.getLatLng().lng,layer.getLatLng().lat])
+                }
               })
             }) // end of popupopen
           } // end of if
@@ -173,6 +176,42 @@ function showbuses(array: string[]) {
     result += `<button>${bus}</button>`
   })
   return result
+}
+
+function closestPointOnLine(line: line, point: point) {
+  let closest
+  let minDist = Infinity
+  let segmentIndex = -1
+
+  for (let i = 0; i < line.length - 1; i++) {
+    const [x1, y1] = line[i]
+    const [x2, y2] = line[i + 1]
+    const [px, py] = point
+
+    const vx = x2 - x1
+    const vy = y2 - y1
+    const wx = px - x1
+    const wy = py - y1
+
+    let t = (wx * vx + wy * vy) / (vx * vx + vy * vy)
+    if (t < 0) t = 0
+    else if (t > 1) t = 1
+
+    const cx = x1 + t * vx
+    const cy = y1 + t * vy
+
+    const dx = px - cx
+    const dy = py - cy
+    const dist = Math.sqrt(dx * dx + dy * dy)
+
+    if (dist < minDist) {
+      minDist = dist
+      closest = [cx, cy]
+      segmentIndex = i
+    }
+  }
+
+  return { point: closest, segmentIndex }
 }
 
 main()
