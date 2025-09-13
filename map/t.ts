@@ -141,7 +141,7 @@ async function main() {
                   routepath.eachLayer(path => {
                     console.log((<L.Polyline>path).getLatLngs())
                   })
-                  const closestLatLng = L.GeometryUtil?.closest(map, routepath, e.target.getLatLng())
+                  const closestLatLng = L.GeometryUtil.closest(map, routepath, e.target.getLatLng())
                   console.log(closestLatLng)
                 }
               })
