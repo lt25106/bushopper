@@ -88,7 +88,3 @@ button:hover {
 button:active {
   background-color: hsl(var(--color), 59%, 36%);
 }
-
-button:disabled {
-  background-color: hsl(var(--color), 30%, 53%);
-}
