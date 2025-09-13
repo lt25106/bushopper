@@ -67,9 +67,12 @@ h1 {
 }
 
 
+:root {
+  --color: 76
+}
 /* button */
 button {
-  background-color: hsl(76, 59%, 53%);
+  background-color: hsl(var(--color), 59%, 53%);
   color: black;
   border: none;
   margin: 0 0.125rem;
@@ -79,13 +82,13 @@ button {
 }
 
 button:hover {
-  background-color: hsl(76, 59%, 70%);
+  background-color: hsl(var(--color), 59%, 70%);
 }
 
 button:active {
-  background-color: hsl(76, 59%, 36%);
+  background-color: hsl(var(--color), 59%, 36%);
 }
 
 button:disabled {
-  background-color: hsl(76, 30%, 53%);
+  background-color: hsl(var(--color), 30%, 53%);
 }
