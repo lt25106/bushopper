@@ -142,7 +142,7 @@ async function main() {
               map.eachLayer(layer => {
                 if (layer instanceof L.CircleMarker) {
                   routepath.eachLayer(path => {
-                    console.log(<L.Polyline>path.getLatLngs())
+                    console.log((<L.Polyline>path).getLatLngs())
                   })
                   const pointonline = closestPointOnLine(routepath,[layer.getLatLng().lng,layer.getLatLng().lat])
                 }
