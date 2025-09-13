@@ -1,7 +1,7 @@
 import L from "leaflet"
 import "leaflet-geometryutil"
 
-// esbuild t.ts --minify --outfile=j.js --bundle --format=esm --watch
+// npm run build
 type point = [number, number]
 type line = point[]
 type fullbusstop = {
@@ -122,10 +122,11 @@ async function main() {
         
         busstops.forEach((busstopnum: string) => {
           if (busstopnum != startbusstop.number && busstopnum != endbusstop.number) {
+            const filtered = stops.features.find(feat => feat.id == busstopnum)!
             const busstop = {
-              name: stops.features.filter(feat => feat.id == busstopnum)[0].properties.name,
-              services: stops.features.filter(feat => feat.id == busstopnum)[0].properties.services,
-              location: stops.features.filter(feat => feat.id == busstopnum)[0].geometry.coordinates
+              name: filtered.properties.name,
+              services: filtered.properties.services,
+              location: filtered.geometry.coordinates
             }
             const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color: color }).addTo(map)
             busstopmarker.bindPopup(`${busstop.name}<br>${showbuses(busstop.services)}</div>`)
