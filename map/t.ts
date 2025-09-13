@@ -11,10 +11,6 @@ type fullbusstop = {
   services: string[],
   road: string
 }
-type minbusstop = {
-  location: point,
-  road: string
-}
 type routes = {
   type: "FeatureCollection",
   features: {

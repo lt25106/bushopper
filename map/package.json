@@ -4,7 +4,7 @@
   "main": "j.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild t.ts --bundle --minify --outfile=j.js"
+    "build": "esbuild t.ts --bundle --minify --format=esm --target=esnext --outfile=j.js"
   },
   "author": "",
   "license": "ISC",
