@@ -1,0 +1,16 @@
+{
+  "name": "map",
+  "version": "1.0.0",
+  "main": "j.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild t.ts --bundle --minify --outfile=j.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "leaflet-geometryutil": "^0.10.3"
+  }
+}
