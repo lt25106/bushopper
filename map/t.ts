@@ -1,7 +1,7 @@
 import L from "leaflet"
 import "leaflet-geometryutil"
 
-// esbuild t.ts --minify --outfile=j.js --bundle --watch
+// esbuild t.ts --minify --outfile=j.js --bundle --format=esm --watch
 type point = [number, number]
 type line = point[]
 type fullbusstop = {
