@@ -141,9 +141,11 @@ async function main() {
                 if (layer instanceof L.CircleMarker) {
                   routepath.eachLayer(path => {
                     console.log((<L.Polyline>path).getLatLngs())
+                    if (path instanceof L.Polyline) {
+                      const closestLatLng = L.GeometryUtil.closest(map, path, e.target.getLatLng())
+                      console.log(closestLatLng)
+                    }
                   })
-                  const closestLatLng = L.GeometryUtil.closest(map, routepath, e.target.getLatLng())
-                  console.log(closestLatLng)
                 }
               })
             }) // end of popupopen
