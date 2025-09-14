@@ -59,10 +59,16 @@ dialog {
   color: white;
   border-radius: 9e9rem;
   text-align: center;
-  font-size: 1rem;
+  font-size: 2rem;
+  padding: 1rem;
 }
 dialog button {
+  font-size: 2rem;
   font-family: sans-serif;
+  padding: 0rem 0.5rem;
+}
+dialog::backdrop {
+  backdrop-filter: blur(0.125rem);
 }
 
 /* leaflet */
