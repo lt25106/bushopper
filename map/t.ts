@@ -99,6 +99,8 @@ async function main() {
   startMarker.on("popupopen", attachButtonListeners)
   endMarker.on("popupopen", attachButtonListeners)
   
+  const dialog = document.querySelector("dialog") as HTMLDialogElement
+
   function attachButtonListeners() {
     const buttons = document.querySelectorAll("button")
     
@@ -112,7 +114,7 @@ async function main() {
       })
       button.addEventListener("mouseout", () => {
         if (!triggeredbyclick) map.removeLayer(routepath)
-        })
+      })
       button.addEventListener("click", () => {
         triggeredbyclick = true
         
@@ -121,7 +123,8 @@ async function main() {
         : services[button.textContent].routes[0]
         
         busstops.forEach((busstopnum: string) => {
-          if (busstopnum != startbusstop.number && busstopnum != endbusstop.number) {
+          if (busstopnum == endbusstop.number) dialog.showModal()
+          if (busstopnum != startbusstop.number) {
             const filtered = stops.features.find(feat => feat.id == busstopnum)!
             const busstop = {
               name: filtered.properties.name,
