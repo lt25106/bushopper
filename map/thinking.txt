@@ -1,2 +1,0 @@
-find which index the bus stop is on
-show it
