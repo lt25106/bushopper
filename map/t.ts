@@ -78,7 +78,7 @@ async function main() {
     road: stops.features[endindex].properties.road
   }
   
-  let hasbusstopbeenreached = {start: false,end: false}
+  const hasbusstopbeenreached = {start: false,end: false}
   // console.log(startbusstop)
   // console.log(endbusstop)
   
@@ -95,7 +95,7 @@ async function main() {
   
   let routepath: L.GeoJSON
   let busnum: string
-  let allowedmarkers = [startMarker, endMarker]
+  const allowedmarkers = [startMarker, endMarker]
   
   startMarker.on("popupopen", attachButtonListeners)
   endMarker.on("popupopen", attachButtonListeners)
@@ -105,10 +105,10 @@ async function main() {
   function attachButtonListeners(marker: L.PopupEvent) {
     if (marker.target == startMarker) {
       endMarker.unbindPopup()
-      hasbusstopbeenreached.end = true
+      hasbusstopbeenreached.start = true
     } else if (marker.target == endMarker) {
       startMarker.unbindPopup()
-      hasbusstopbeenreached.start = true
+      hasbusstopbeenreached.end = true
     }
   
     document.querySelectorAll("button").forEach(button => {
@@ -126,6 +126,10 @@ async function main() {
       })
   
       button.addEventListener("click", () => {
+        console.log(services[busnum].routes.flat())
+        if (services[busnum].routes.flat().includes(endbusstop.number)) hasbusstopbeenreached.end = true
+        if (services[busnum].routes.flat().includes(startbusstop.number)) hasbusstopbeenreached.start = true
+        if (hasbusstopbeenreached.start && hasbusstopbeenreached.end) dialog.showModal()
         triggeredByClick = true
         const routes = services[button.textContent].routes
         const busstops = routes[1] ? routes[0].concat(routes[1]) : routes[0]
