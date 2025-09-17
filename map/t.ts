@@ -78,6 +78,7 @@ async function main() {
     road: stops.features[endindex].properties.road
   }
   
+  let hasbusstopbeenreached = {start: false,end: false}
   // console.log(startbusstop)
   // console.log(endbusstop)
   
@@ -101,63 +102,79 @@ async function main() {
   
   const dialog = document.querySelector("dialog") as HTMLDialogElement
 
-  function attachButtonListeners() {
-    const buttons = document.querySelectorAll("button")
-    
-    buttons.forEach(button => {
-      let triggeredbyclick: boolean
+  function attachButtonListeners(marker: L.PopupEvent) {
+    if (marker.target == startMarker) {
+      endMarker.unbindPopup()
+      hasbusstopbeenreached.end = true
+    } else if (marker.target == endMarker) {
+      startMarker.unbindPopup()
+      hasbusstopbeenreached.start = true
+    }
+  
+    document.querySelectorAll("button").forEach(button => {
+      let triggeredByClick: boolean
       const color = `hsl(${Math.random() * 360},100%,50%)`
+  
       button.addEventListener("mouseover", () => {
-        routepath = L.geoJSON(getroutepath(button.textContent), { style: { color: color } }).addTo(map)
+        routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
         busnum = button.textContent
-        triggeredbyclick = false
+        triggeredByClick = false
       })
+  
       button.addEventListener("mouseout", () => {
-        if (!triggeredbyclick) map.removeLayer(routepath)
+        if (!triggeredByClick) map.removeLayer(routepath)
       })
+  
       button.addEventListener("click", () => {
-        triggeredbyclick = true
-        
-        const busstops = services[button.textContent].routes[1]
-        ? services[button.textContent].routes[0].concat(services[button.textContent].routes[1])
-        : services[button.textContent].routes[0]
-        
-        busstops.forEach((busstopnum: string) => {
-          if (busstopnum == endbusstop.number) dialog.showModal()
-          if (busstopnum != startbusstop.number) {
-            const filtered = stops.features.find(feat => feat.id == busstopnum)!
-            const busstop = {
-              name: filtered.properties.name,
-              services: filtered.properties.services,
-              location: filtered.geometry.coordinates
-            }
-            const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color: color }).addTo(map)
-            busstopmarker.bindPopup(`${busstop.name}<br>${showbuses(busstop.services)}</div>`)
-            busstopmarker.on("popupopen", attachButtonListeners)
-            busstopmarker.on("popupopen", e => {
-              allowedmarkers.push(e.target)
-              map.eachLayer(layer => {
-                if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
-                  if (layer != e.target) layer.unbindPopup()
-                  })
-              map.eachLayer(layer => {
-                if (layer instanceof L.CircleMarker) {
-                  routepath.eachLayer(path => {
-                    console.log((<L.Polyline>path).getLatLngs())
-                    if (path instanceof L.Polyline) {
-                      const closestLatLng = L.GeometryUtil.closest(map, path, e.target.getLatLng())
-                      console.log(closestLatLng)
-                    }
-                  })
-                }
-              })
-            }) // end of popupopen
-          } // end of if
-        }) // end of foreach
+        triggeredByClick = true
+        const routes = services[button.textContent].routes
+        const busstops = routes[1] ? routes[0].concat(routes[1]) : routes[0]
+  
+        busstops.forEach(busstopnum => {
+          if (busstopnum == startbusstop.number) return
+  
+          const filtered = stops.features.find(feat => feat.id == busstopnum)!
+          const busstop = {
+            name: filtered.properties.name,
+            services: filtered.properties.services,
+            location: filtered.geometry.coordinates
+          }
+  
+          const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color }).addTo(map)
+          busstopmarker.bindPopup(`${busstop.name}<br>${showbuses(busstop.services)}</div>`)
+          busstopmarker.on("popupopen", attachButtonListeners)
+          busstopmarker.on("popupopen", e => {
+            allowedmarkers.push(e.target)
+            cleanupMarkers(e.target)
+            analyzeClosestPoints(e.target, routepath)
+          })
+        })
+  
         map.closePopup()
-      }) // end of eventlistener
-    }) // end of foreach
-  } // end of function
+      })
+    })
+  }
+  
+  function cleanupMarkers(target: any) {
+    map.eachLayer(layer => {
+      if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
+      if (layer != target) layer.unbindPopup()
+    })
+  }
+  
+  function analyzeClosestPoints(target: any, route: L.GeoJSON) {
+    map.eachLayer(layer => {
+      if (layer instanceof L.CircleMarker) {
+        route.eachLayer(path => {
+          if (path instanceof L.Polyline) {
+            console.log((<L.Polyline>path).getLatLngs())
+            const closestLatLng = L.GeometryUtil.closest(map, path, target.getLatLng())
+            console.log(closestLatLng)
+          }
+        })
+      }
+    })
+  }
   
   function getroutepath(num: string) {
     const matches = routes.features.filter(feat => feat.properties.number == num)
