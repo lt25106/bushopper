@@ -62,6 +62,9 @@ dialog {
   font-size: 2rem;
   padding: 1rem;
 }
+dialog span {
+  font-size: 2rem;
+}
 dialog button {
   font-size: 2rem;
   font-family: sans-serif;

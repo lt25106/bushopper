@@ -11,7 +11,9 @@
   <h1>BusHopper</h1>
   <img src="loading.svg">
   <dialog>
-    You have reached the destination!<br>
+    You have reached the destination! Your route:<br>
+    <span></span><br>
+    <button onclick="navigator.clipboard.writeText(document.querySelector('span').textContent)">Copy Route</button>
     <a href="./"><button>Restart</button></a>
   </dialog>
   <div id="map"></div>

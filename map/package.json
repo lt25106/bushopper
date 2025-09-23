@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "main": "deploy/j.js",
   "scripts": {
-    "build": "esbuild t.ts --bundle --minify --format=esm --target=esnext --outfile=deploy/j.js"
+    "build": "esbuild t.ts --bundle --minify --format=esm --target=esnext --outfile=deploy/j.js",
+    "watch": "esbuild t.ts --bundle --minify --format=esm --target=esnext --outfile=deploy/j.js --watch"
   },
   "repository": {
     "type": "git",

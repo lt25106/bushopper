@@ -55,9 +55,6 @@ const [routes, services, stops]: [routes,services,stops] = await Promise.all([
   fetch("https://data.busrouter.sg/v1/stops.geojson").then(res => res.json())
 ])
 
-// console.log(routes)   // routes data
-// console.log(services) // services data
-// console.log(stops)    // stops data
 
 const startindex = Math.floor(Math.random() * stops["features"].length)
 const endindex = Math.floor(Math.random() * stops["features"].length)
@@ -78,8 +75,6 @@ const endbusstop: fullbusstop = {
 }
 
 const hasbusstopbeenreached = {start: false,end: false}
-// console.log(startbusstop)
-// console.log(endbusstop)
 
 const hasrepeatbuses = startbusstop.services.some(r => endbusstop.services.includes(r))
 if (hasrepeatbuses) location.reload()
@@ -94,20 +89,24 @@ endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)
 
 let routepath: L.GeoJSON
 let busnum: string
+const routeshowntouser: string[] = []
 const allowedmarkers = [startMarker, endMarker]
 
 startMarker.on("popupopen", attachButtonListeners)
 endMarker.on("popupopen", attachButtonListeners)
 
 const dialog = document.querySelector("dialog") as HTMLDialogElement
+const span = dialog.querySelector("span") as HTMLSpanElement
 
 function attachButtonListeners(marker: L.PopupEvent) {
   if (marker.target == startMarker) {
     endMarker.unbindPopup()
     hasbusstopbeenreached.start = true
+    routeshowntouser.push(startbusstop.name)
   } else if (marker.target == endMarker) {
     startMarker.unbindPopup()
     hasbusstopbeenreached.end = true
+    routeshowntouser.push(endbusstop.name)
   }
   
   document.querySelectorAll("button").forEach(button => {
@@ -122,13 +121,23 @@ function attachButtonListeners(marker: L.PopupEvent) {
     
     button.addEventListener("mouseout", () => {
       if (!triggeredByClick) map.removeLayer(routepath)
-      })
+    })
     
     button.addEventListener("click", () => {
-      console.log(services[busnum].routes.flat())
-      if (services[busnum].routes.flat().includes(endbusstop.number)) hasbusstopbeenreached.end = true
-      if (services[busnum].routes.flat().includes(startbusstop.number)) hasbusstopbeenreached.start = true
-      if (hasbusstopbeenreached.start && hasbusstopbeenreached.end) dialog.showModal()
+      routeshowntouser.push(button.textContent)
+      const busroute = services[busnum].routes.flat()
+      if (busroute.includes(endbusstop.number) && !hasbusstopbeenreached.end) {
+        hasbusstopbeenreached.end = true
+        routeshowntouser.push(endbusstop.name)
+      }
+      if (busroute.includes(startbusstop.number) && !hasbusstopbeenreached.start) {
+        hasbusstopbeenreached.start = true
+        routeshowntouser.push(startbusstop.name)
+      }
+      if (hasbusstopbeenreached.start && hasbusstopbeenreached.end) {
+        span.textContent = routeshowntouser.join(" → ")
+        dialog.showModal()
+      }
         triggeredByClick = true
       const routes = services[button.textContent].routes
       const busstops = routes[1] ? routes[0].concat(routes[1]) : routes[0]
@@ -144,12 +153,12 @@ function attachButtonListeners(marker: L.PopupEvent) {
         }
         
         const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color }).addTo(map)
-        busstopmarker.bindPopup(`${busstop.name}<br>${showbuses(busstop.services)}</div>`)
+        busstopmarker.bindPopup(`<div>${busstop.name}<br>${showbuses(busstop.services)}</div>`)
         busstopmarker.on("popupopen", attachButtonListeners)
         busstopmarker.on("popupopen", e => {
+          routeshowntouser.push(busstop.name)
           allowedmarkers.push(e.target)
           cleanupMarkers(e.target)
-          analyzeClosestPoints(e.target, routepath)
         })
       })
       
@@ -163,20 +172,6 @@ function cleanupMarkers(target: any) {
     if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
       if (layer != target) layer.unbindPopup()
       })
-}
-
-function analyzeClosestPoints(target: any, route: L.GeoJSON) {
-  map.eachLayer(layer => {
-    if (layer instanceof L.CircleMarker) {
-      route.eachLayer(path => {
-        if (path instanceof L.Polyline) {
-          console.log((<L.Polyline>path).getLatLngs())
-          const closestLatLng = L.GeometryUtil.closest(map, path, target.getLatLng())
-          console.log(closestLatLng)
-        }
-      })
-    }
-  })
 }
 
 function getroutepath(num: string) {
