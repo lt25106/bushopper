@@ -62,7 +62,7 @@ dialog {
   font-size: 2rem;
   padding: 1rem;
 }
-dialog span {
+dialog > span {
   font-size: 2rem;
 }
 dialog button {
@@ -72,6 +72,11 @@ dialog button {
 }
 dialog::backdrop {
   backdrop-filter: blur(0.125rem);
+}
+img[src="copy.svg"] {
+  height: 2rem;
+  width: 2rem;
+  margin: 0;
 }
 
 /* leaflet */
