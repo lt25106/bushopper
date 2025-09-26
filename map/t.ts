@@ -96,7 +96,7 @@ startMarker.on("popupopen", attachButtonListeners)
 endMarker.on("popupopen", attachButtonListeners)
 
 const dialog = document.querySelector("dialog") as HTMLDialogElement
-const span = dialog.querySelector("span") as HTMLSpanElement
+const span = dialog.querySelector("span:not(#copied)") as HTMLSpanElement
 
 function attachButtonListeners(marker: L.PopupEvent) {
   if (marker.target == startMarker) {

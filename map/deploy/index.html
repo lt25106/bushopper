@@ -13,7 +13,8 @@
   <dialog>
     You have reached the destination! Your route:<br>
     <span></span><br>
-    <img src="copy.svg" onclick="navigator.clipboard.writeText(document.querySelector('span').textContent)">
+    <img src="copy.svg" onclick="navigator.clipboard.writeText(document.querySelector('span').textContent);document.getElementById('copied').style.display='inline'">
+    <span id="copied">Copied!</span>
     <a href="./"><img src="restart.svg"></a>
   </dialog>
   <div id="map"></div>
