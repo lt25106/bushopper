@@ -72,6 +72,10 @@ dialog img {
   height: 3rem;
   width: 3rem;
   margin: 0;
+  transition: all 0.67s;
+}
+dialog img:hover {
+  scale: 1.067;
 }
 #copied {
   display: none;
