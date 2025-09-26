@@ -73,6 +73,9 @@ dialog img {
   width: 3rem;
   margin: 0;
 }
+#copied {
+  display: none;
+}
 
 /* leaflet */
 .leaflet-control {
