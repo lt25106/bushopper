@@ -12,11 +12,14 @@
   <img src="loading.svg">
   <dialog>
     You have reached the destination! Your route:<br>
-    <span></span><br>
+    <span></span>
     <img src="copy.svg" onclick="navigator.clipboard.writeText(document.querySelector('span').textContent)">
-    <a href="./"><button>Restart</button></a>
+    <a href="./"><img src="restart.svg"></a>
   </dialog>
   <div id="map"></div>
   <script src="j.js" type="module"></script>
+  <script>
+    document.querySelector("dialog").showModal()
+  </script>
 </body>
 </html>

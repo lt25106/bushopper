@@ -65,17 +65,12 @@ dialog {
 dialog > span {
   font-size: 2rem;
 }
-dialog button {
-  font-size: 2rem;
-  font-family: sans-serif;
-  padding: 0rem 0.5rem;
-}
 dialog::backdrop {
   backdrop-filter: blur(0.125rem);
 }
-img[src="copy.svg"] {
-  height: 2rem;
-  width: 2rem;
+dialog img {
+  height: 3rem;
+  width: 3rem;
   margin: 0;
 }
 
