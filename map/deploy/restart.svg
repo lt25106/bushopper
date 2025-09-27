@@ -24,9 +24,9 @@
      inkscape:deskcolor="#505050"
      inkscape:document-units="mm"
      labelstyle="default"
-     inkscape:zoom="0.45761186"
-     inkscape:cx="205.41426"
-     inkscape:cy="409.73589"
+     inkscape:zoom="0.91522372"
+     inkscape:cx="164.98698"
+     inkscape:cy="699.82889"
      inkscape:window-width="1920"
      inkscape:window-height="1094"
      inkscape:window-x="-11"
@@ -60,28 +60,18 @@
        r="111.44149"
        transform="rotate(-1.6001286)" />
     <path
-       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:12.3747;stroke-linejoin:round;stroke-miterlimit:11.6;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-       id="path2-8"
-       sodipodi:type="arc"
-       sodipodi:cx="106.08031"
-       sodipodi:cy="188.72726"
-       sodipodi:rx="74.294334"
-       sodipodi:ry="74.294334"
-       sodipodi:start="1.5707963"
-       sodipodi:end="0"
-       sodipodi:arc-type="slice"
-       d="m 106.08031,263.0216 a 74.294334,74.294334 0 0 1 -68.639017,-45.86312 74.294334,74.294334 0 0 1 16.104986,-80.96524 74.294334,74.294334 0 0 1 80.965241,-16.10499 74.294334,74.294334 0 0 1 45.86312,68.63901 h -74.29433 z"
-       transform="rotate(-1.6001286)" />
-    <circle
-       style="fill:#a8ce40;fill-opacity:1;stroke:none;stroke-width:9.28096;stroke-linejoin:round;stroke-miterlimit:11.6;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-       id="path2-8-1"
-       cx="106.08031"
-       cy="188.72726"
-       r="55.720501"
-       transform="rotate(-1.6001286)" />
+       d="m 109.23441,111.42603 a 74.294334,74.294334 0 0 0 -51.905874,23.21874 74.294334,74.294334 0 0 0 -13.837915,81.38366 74.294334,74.294334 0 0 0 69.892889,43.92859 l -0.51883,-18.56683 a 55.720501,55.720501 0 0 1 -57.254385,-54.14295 55.720501,55.720501 0 0 1 54.142945,-57.25438 55.720501,55.720501 0 0 1 57.25439,54.14295 l 18.56682,-0.51884 a 74.294334,74.294334 0 0 0 -47.76194,-67.3318 74.294334,74.294334 0 0 0 -28.5781,-4.85914 z"
+       style="stroke-width:12.3747;stroke-linejoin:round;stroke-miterlimit:11.6;paint-order:markers stroke fill"
+       id="path3" />
     <path
        d="m 157.68525,184.28754 19.08844,18.15646 18.04507,-19.19378 z"
        style="fill:#000000;fill-opacity:1;stroke-width:6.61502;stroke-linejoin:round;stroke-miterlimit:11.6;paint-order:markers stroke fill"
        id="path1" />
+    <circle
+       style="fill:#000000;stroke-width:14.205;stroke-linejoin:round;stroke-miterlimit:11.6;paint-order:markers stroke fill"
+       id="path4"
+       cx="113.12409"
+       cy="250.6736"
+       r="9.283" />
   </g>
 </svg>
