@@ -111,7 +111,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
   
   document.querySelectorAll("button").forEach(button => {
     let triggeredByClick: boolean
-    const color = `hsl(${Math.random() * 360},100%,50%)`
+    const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 77.5 + 12.5}%)`
     
     button.addEventListener("mouseover", () => {
       routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
@@ -143,7 +143,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
       const busstops = routes[1] ? routes[0].concat(routes[1]) : routes[0]
       
       busstops.forEach(busstopnum => {
-        if (busstopnum == startbusstop.number) return
+        if (busstopnum == startbusstop.number || busstopnum == endbusstop.number) return
         
         const filtered = stops.features.find(feat => feat.id == busstopnum)!
         const busstop = {
@@ -170,8 +170,8 @@ function attachButtonListeners(marker: L.PopupEvent) {
 function cleanupMarkers(target: any) {
   map.eachLayer(layer => {
     if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
-      if (layer != target) layer.unbindPopup()
-      })
+    if (layer != target) layer.unbindPopup()
+  })
 }
 
 function getroutepath(num: string) {
