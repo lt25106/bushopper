@@ -1,0 +1,63 @@
+name: Style Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # HTML: semantic and valid
+      - name: Lint HTML
+        run: |
+          npm install -g htmlhint
+          htmlhint "**/*.html"
+
+      # CSS: enforce order, no inline, naming consistency
+      - name: Lint CSS
+        run: |
+          npm install -g stylelint
+          cat > .stylelintrc.json <<'EOF'
+          {
+            "extends": "stylelint-config-standard",
+            "rules": {
+              "indentation": 2,
+              "declaration-block-properties-order": [
+                [
+                  { "properties": ["position","top","right","bottom","left","z-index"] },
+                  { "properties": ["display","float","clear","overflow","box-sizing"] },
+                  { "properties": ["width","height","margin","padding","border"] },
+                  { "properties": ["font","font-size","color","text-align","line-height"] },
+                  { "properties": ["background","box-shadow"] }
+                ],
+                { "unspecified": "bottom" }
+              ],
+              "no-inline-styles": true
+            }
+          }
+          EOF
+          stylelint "**/*.css"
+
+      # JavaScript: no semicolons, prefer ==, 2-space indent
+      - name: Lint JS
+        run: |
+          npm install -g eslint
+          cat > .eslintrc.json <<'EOF'
+          {
+            "env": { "browser": true, "es2021": true },
+            "extends": ["eslint:recommended"],
+            "rules": {
+              "indent": ["error", 2],
+              "semi": ["error", "never"],
+              "eqeqeq": ["error", "never"], 
+              "no-inline-comments": "off"
+            }
+          }
+          EOF
+          eslint "**/*.js"

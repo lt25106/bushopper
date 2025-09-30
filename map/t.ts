@@ -102,11 +102,11 @@ function attachButtonListeners(marker: L.PopupEvent) {
   if (marker.target == startMarker) {
     endMarker.unbindPopup()
     hasbusstopbeenreached.start = true
-    routeshowntouser.push(startbusstop.name)
+    if (routeshowntouser.at(-1) != startbusstop.name) routeshowntouser.push(startbusstop.name)
   } else if (marker.target == endMarker) {
     startMarker.unbindPopup()
     hasbusstopbeenreached.end = true
-    routeshowntouser.push(endbusstop.name)
+    if (routeshowntouser.at(-1) != endbusstop.name) routeshowntouser.push(endbusstop.name)
   }
   
   document.querySelectorAll("button").forEach(button => {
