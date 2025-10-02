@@ -57,7 +57,7 @@ dialog {
   border: none;
   background-color: black;
   color: white;
-  border-radius: 9e9rem;
+  border-radius: 2rem;
   text-align: center;
   font-size: 2rem;
   padding: 1rem;
@@ -108,6 +108,11 @@ button {
   transition: background-color 0.25s;
   font-family: "LTAIdentity", sans-serif;
   border-radius: 9e9rem;
+}
+#confirm {
+  background-color: hsl(256, 59%, 53%);
+  color: white;
+  font-family: sans-serif;
 }
 
 button:hover {

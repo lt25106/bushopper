@@ -84,13 +84,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
 const startMarker = L.circleMarker([startbusstop.location[1], startbusstop.location[0]], { color: "red" }).addTo(map)
 const endMarker = L.circleMarker([endbusstop.location[1], endbusstop.location[0]], { color: "red" }).addTo(map)
 
-startMarker.bindPopup(`<div>${startbusstop.name}<br>${showbuses(startbusstop.services)}</div>`)
-endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}</div>`)
+startMarker.bindPopup(`<div>${startbusstop.name}<br>${showbuses(startbusstop.services)}<br><button id="confirm">Confirm</button></div>`)
+endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}<br><button id="confirm">Confirm</button></div>`)
 
 let routepath: L.GeoJSON
 let busnum: string
 const routeshowntouser: string[] = []
 const allowedmarkers = [startMarker, endMarker]
+const allowedroutes: L.Polyline[] = []
 
 startMarker.on("popupopen", attachButtonListeners)
 endMarker.on("popupopen", attachButtonListeners)
@@ -110,22 +111,15 @@ function attachButtonListeners(marker: L.PopupEvent) {
   }
   
   document.querySelectorAll("button").forEach(button => {
-    let triggeredByClick: boolean
     const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 77.5 + 12.5}%)`
     
-    button.addEventListener("mouseover", () => {
-      routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
-      busnum = button.textContent
-      triggeredByClick = false
-    })
-    
-    button.addEventListener("mouseout", () => {
-      if (!triggeredByClick) map.removeLayer(routepath)
-    })
-    
     button.addEventListener("click", () => {
+      map.eachLayer(layer => {
+        if (layer instanceof L.Polyline && !(allowedroutes.includes(layer))) layer.remove()
+      })
+      routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
       routeshowntouser.push(button.textContent)
-      const busroute = services[busnum].routes.flat()
+      const busroute = services[button.textContent].routes.flat()
       if (busroute.includes(endbusstop.number) && !hasbusstopbeenreached.end) {
         hasbusstopbeenreached.end = true
         routeshowntouser.push(endbusstop.name)
@@ -138,7 +132,6 @@ function attachButtonListeners(marker: L.PopupEvent) {
         span.textContent = routeshowntouser.join(" → ")
         dialog.showModal()
       }
-        triggeredByClick = true
       const routes = services[button.textContent].routes
       const busstops = routes[1] ? routes[0].concat(routes[1]) : routes[0]
       
@@ -151,26 +144,8 @@ function attachButtonListeners(marker: L.PopupEvent) {
           services: filtered.properties.services,
           location: filtered.geometry.coordinates
         }
-        
-        const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color }).addTo(map)
-        busstopmarker.bindPopup(`<div>${busstop.name}<br>${showbuses(busstop.services)}</div>`)
-        busstopmarker.on("popupopen", attachButtonListeners)
-        busstopmarker.on("popupopen", e => {
-          routeshowntouser.push(busstop.name)
-          allowedmarkers.push(e.target)
-          cleanupMarkers(e.target)
-        })
       })
-      
-      map.closePopup()
     })
-  })
-}
-
-function cleanupMarkers(target: any) {
-  map.eachLayer(layer => {
-    if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
-    if (layer != target) layer.unbindPopup()
   })
 }
 
