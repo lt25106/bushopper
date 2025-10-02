@@ -1,7 +1,6 @@
 import L from "leaflet"
 import "leaflet-geometryutil"
 
-// npm run build
 type point = [number, number]
 type line = point[]
 type fullbusstop = {
@@ -84,8 +83,8 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
 const startMarker = L.circleMarker([startbusstop.location[1], startbusstop.location[0]], { color: "red" }).addTo(map)
 const endMarker = L.circleMarker([endbusstop.location[1], endbusstop.location[0]], { color: "red" }).addTo(map)
 
-startMarker.bindPopup(`<div>${startbusstop.name}<br>${showbuses(startbusstop.services)}<br><button id="confirm">Confirm</button></div>`)
-endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}<br><button id="confirm">Confirm</button></div>`)
+startMarker.bindPopup(`<div>${startbusstop.name}<br>${showbuses(startbusstop.services)}<br><button class="confirm">Confirm</button></div>`)
+endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}<br><button class="confirm">Confirm</button></div>`)
 
 let routepath: L.GeoJSON
 let busnum: string
@@ -98,6 +97,7 @@ endMarker.on("popupopen", attachButtonListeners)
 
 const dialog = document.querySelector("dialog") as HTMLDialogElement
 const span = dialog.querySelector("span:not(#copied)") as HTMLSpanElement
+const confirms = document.getElementsByClassName("confirm") as HTMLCollectionOf<HTMLButtonElement>
 
 function attachButtonListeners(marker: L.PopupEvent) {
   if (marker.target == startMarker) {
@@ -111,10 +111,14 @@ function attachButtonListeners(marker: L.PopupEvent) {
   }
   
   document.querySelectorAll("button").forEach(button => {
+    if (button.textContent == "Confirm") {
+      return
+    }
     const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 77.5 + 12.5}%)`
     
     button.addEventListener("click", () => {
       map.eachLayer(layer => {
+        Array.from(confirms).forEach(confirm => {confirm.style.display = "inline"})
         if (layer instanceof L.Polyline && !(allowedroutes.includes(layer))) map.removeLayer(layer)
       })
       routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)

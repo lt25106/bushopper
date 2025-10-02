@@ -85,7 +85,6 @@ dialog img:hover {
 .leaflet-control {
   display: none;
 }
-
 .leaflet-popup-content {
   font-family: "LTAIdentity", sans-serif;
 }
@@ -95,13 +94,9 @@ dialog img:hover {
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.25);
 }
 
-
-:root {
-  --color: 76
-}
 /* button */
 button {
-  background-color: hsl(var(--color), 59%, 53%);
+  background-color: hsl(76, 59%, 53%);
   color: black;
   border: none;
   margin: 0 0.125rem;
@@ -109,16 +104,22 @@ button {
   font-family: "LTAIdentity", sans-serif;
   border-radius: 9e9rem;
 }
-#confirm {
+button:hover {
+  background-color: hsl(76, 59%, 70%);
+}
+button:active {
+  background-color: hsl(76, 59%, 36%);
+}
+
+.confirm {
+  display: none;
   background-color: hsl(256, 59%, 53%);
   color: white;
   font-family: sans-serif;
 }
-
-button:hover {
-  background-color: hsl(var(--color), 59%, 70%);
+.confirm:hover {
+  background-color: hsl(256, 59%, 70%);
 }
-
-button:active {
-  background-color: hsl(var(--color), 59%, 36%);
+.confirm:active {
+  background-color: hsl(256, 59%, 36%);
 }
