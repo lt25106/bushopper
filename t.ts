@@ -115,7 +115,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
     
     button.addEventListener("click", () => {
       map.eachLayer(layer => {
-        if (layer instanceof L.Polyline && !(allowedroutes.includes(layer))) layer.remove()
+        if (layer instanceof L.Polyline && !(allowedroutes.includes(layer))) map.removeLayer(layer)
       })
       routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
       routeshowntouser.push(button.textContent)
