@@ -110,12 +110,17 @@ function attachButtonListeners(marker: L.PopupEvent) {
   }
   
   document.querySelectorAll("button").forEach(button => {
-    if (button.textContent == "Confirm") {
-      return
-    }
     const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 77.5 + 12.5}%)`
-    
+    if (button.dataset.eventlisteneradded) return
     button.addEventListener("click", () => {
+      button.dataset.eventlisteneradded = "true"
+      if (button.textContent == "Confirm") {
+        console.log(allowedroutes)
+        map.eachLayer(layer => {
+          if (layer instanceof L.Polyline) allowedroutes.push(layer)
+        })
+        return
+      }
       (<HTMLButtonElement>marker.popup.getElement()!.querySelector(".confirm")).style.display = "inline"
       map.eachLayer(layer => {
         if (layer instanceof L.Polyline && !(allowedroutes.includes(layer))) map.removeLayer(layer)
