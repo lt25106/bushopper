@@ -103,11 +103,11 @@ function attachButtonListeners(marker: L.PopupEvent) {
     endMarker.unbindPopup()
     hasbusstopbeenreached.start = true
     if (routeshowntouser.at(-1) != startbusstop.name) routeshowntouser.push(startbusstop.name)
-  } else if (marker.target == endMarker) {
+    } else if (marker.target == endMarker) {
     startMarker.unbindPopup()
     hasbusstopbeenreached.end = true
     if (routeshowntouser.at(-1) != endbusstop.name) routeshowntouser.push(endbusstop.name)
-  }
+    }
   
   document.querySelectorAll("button").forEach(button => {
     const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 77.5 + 12.5}%)`
@@ -120,12 +120,35 @@ function attachButtonListeners(marker: L.PopupEvent) {
           if (layer instanceof L.Polyline) allowedroutes.push(layer)
         })
         map.closePopup()
+        const routes = services[busnum].routes
+        const busstops = routes[1] ? routes[0].concat(routes[1]) : routes[0]
+        
+        busstops.forEach(busstopnum => {
+          if (busstopnum == startbusstop.number || busstopnum == endbusstop.number) return
+          
+          const filtered = stops.features.find(feat => feat.id == busstopnum)!
+          const busstop = {
+            name: filtered.properties.name,
+            services: filtered.properties.services,
+            location: filtered.geometry.coordinates
+          }
+          
+          const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color }).addTo(map)
+          busstopmarker.bindPopup(`<div>${busstop.name}<br>${showbuses(busstop.services)}</div>`)
+          busstopmarker.on("popupopen", attachButtonListeners)
+          busstopmarker.on("popupopen", e => {
+            routeshowntouser.push(busstop.name)
+            allowedmarkers.push(e.target)
+            cleanupMarkers(e.target)
+          })
+        })
         return
       }
+      busnum = button.textContent;
       (<HTMLButtonElement>marker.popup.getElement()!.querySelector(".confirm")).style.display = "inline"
       map.eachLayer(layer => {
         if (layer instanceof L.Polyline && !(allowedroutes.includes(layer))) map.removeLayer(layer)
-      })
+        })
       routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
       routeshowntouser.push(button.textContent)
       const busroute = services[button.textContent].routes.flat()
@@ -141,14 +164,6 @@ function attachButtonListeners(marker: L.PopupEvent) {
         span.textContent = routeshowntouser.join(" → ")
         dialog.showModal()
       }
-      const routes = services[button.textContent].routes
-      const busstops = routes[1] ? routes[0].concat(routes[1]) : routes[0]
-      
-      busstops.forEach(busstopnum => {
-        if (busstopnum == startbusstop.number || busstopnum == endbusstop.number) return
-        
-        const filtered = stops.features.find(feat => feat.id == busstopnum)!
-      })
     })
   })
 }
@@ -175,4 +190,11 @@ function showbuses(array: string[]) {
     result += `<button>${bus}</button>`
   })
   return result
+}
+
+function cleanupMarkers(target: any) {
+  map.eachLayer(layer => {
+    if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
+      if (layer != target) layer.unbindPopup()
+      })
 }
