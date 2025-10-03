@@ -119,7 +119,9 @@ button:active {
 }
 .confirm:hover {
   background-color: hsl(256, 59%, 70%);
+  color: black
 }
 .confirm:active {
   background-color: hsl(256, 59%, 36%);
+  color: white
 }

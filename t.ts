@@ -97,7 +97,6 @@ endMarker.on("popupopen", attachButtonListeners)
 
 const dialog = document.querySelector("dialog") as HTMLDialogElement
 const span = dialog.querySelector("span:not(#copied)") as HTMLSpanElement
-const confirms = document.getElementsByClassName("confirm") as HTMLCollectionOf<HTMLButtonElement>
 
 function attachButtonListeners(marker: L.PopupEvent) {
   if (marker.target == startMarker) {
@@ -117,8 +116,8 @@ function attachButtonListeners(marker: L.PopupEvent) {
     const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 77.5 + 12.5}%)`
     
     button.addEventListener("click", () => {
+      (<HTMLButtonElement>marker.popup.getElement()!.querySelector(".confirm")).style.display = "inline"
       map.eachLayer(layer => {
-        Array.from(confirms).forEach(confirm => {confirm.style.display = "inline"})
         if (layer instanceof L.Polyline && !(allowedroutes.includes(layer))) map.removeLayer(layer)
       })
       routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
@@ -143,11 +142,6 @@ function attachButtonListeners(marker: L.PopupEvent) {
         if (busstopnum == startbusstop.number || busstopnum == endbusstop.number) return
         
         const filtered = stops.features.find(feat => feat.id == busstopnum)!
-        const busstop = {
-          name: filtered.properties.name,
-          services: filtered.properties.services,
-          location: filtered.geometry.coordinates
-        }
       })
     })
   })
