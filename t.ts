@@ -138,10 +138,24 @@ function attachButtonListeners(marker: L.PopupEvent) {
           busstopmarker.bindPopup(`<div>${busstop.name}<br>${showbuses(busstop.services)}<br><button class="confirm">Confirm</button></div>`)
           busstopmarker.on("popupopen", attachButtonListeners)
           busstopmarker.on("popupopen", e => {
+            routeshowntouser.push(busstop.name)
             allowedmarkers.push(e.target)
             cleanupMarkers(e.target)
           })
         })
+        const busroute = services[busnum].routes.flat()
+        if (busroute.includes(endbusstop.number) && !hasbusstopbeenreached.end) {
+          hasbusstopbeenreached.end = true
+          routeshowntouser.push(endbusstop.name)
+        }
+        if (busroute.includes(startbusstop.number) && !hasbusstopbeenreached.start) {
+          hasbusstopbeenreached.start = true
+          routeshowntouser.push(startbusstop.name)
+        }
+        if (hasbusstopbeenreached.start && hasbusstopbeenreached.end) {
+          span.textContent = routeshowntouser.join(" → ")
+          dialog.showModal()
+        }
         return
       }
       buscolor = color
@@ -151,20 +165,6 @@ function attachButtonListeners(marker: L.PopupEvent) {
         if (layer instanceof L.Polyline && !(allowedroutes.includes(layer))) map.removeLayer(layer)
       })
       routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
-      routeshowntouser.push(button.textContent)
-      const busroute = services[button.textContent].routes.flat()
-      if (busroute.includes(endbusstop.number) && !hasbusstopbeenreached.end) {
-        hasbusstopbeenreached.end = true
-        routeshowntouser.push(endbusstop.name)
-      }
-      if (busroute.includes(startbusstop.number) && !hasbusstopbeenreached.start) {
-        hasbusstopbeenreached.start = true
-        routeshowntouser.push(startbusstop.name)
-      }
-      if (hasbusstopbeenreached.start && hasbusstopbeenreached.end) {
-        span.textContent = routeshowntouser.join(" → ")
-        dialog.showModal()
-      }
     })
   })
 }
