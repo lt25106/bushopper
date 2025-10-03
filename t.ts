@@ -119,6 +119,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
         map.eachLayer(layer => {
           if (layer instanceof L.Polyline) allowedroutes.push(layer)
         })
+        map.closePopup()
         return
       }
       (<HTMLButtonElement>marker.popup.getElement()!.querySelector(".confirm")).style.display = "inline"
