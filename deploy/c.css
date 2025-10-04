@@ -86,7 +86,11 @@ dialog img:hover {
   display: none;
 }
 .leaflet-popup-content {
+  max-width: fit-content;
   font-family: "LTAIdentity", sans-serif;
+}
+.leaflet-popup-content > div {
+  line-height: 1.75;
 }
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
   background-color: rgba(255, 255, 255, 0.25);
@@ -103,6 +107,7 @@ button {
   transition: background-color 0.25s;
   font-family: "LTAIdentity", sans-serif;
   border-radius: 9e9rem;
+  font-size: 1.25rem;
 }
 button:hover {
   background-color: hsl(76, 59%, 70%);
