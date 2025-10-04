@@ -1,5 +1,4 @@
 import L from "leaflet"
-import "leaflet-geometryutil"
 
 // npm run build
 type point = [number, number]
