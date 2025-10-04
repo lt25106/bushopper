@@ -1,5 +1,4 @@
 import L from "leaflet"
-import "leaflet-geometryutil"
 
 type point = [number, number]
 type line = point[]
