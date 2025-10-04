@@ -1,9 +1,0 @@
-[build]
-  publish = "deploy"
-  functions = "netlify/functions"
-
-[[redirects]]
-  from = "/"               # all requests to root
-  to = "netlify/functions/redirect"  # call the function
-  status = 200             # 200 so function runs and decides redirect
-  force = true   
