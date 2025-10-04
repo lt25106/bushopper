@@ -88,7 +88,6 @@ const endMarker = L.circleMarker([endbusstop.location[1], endbusstop.location[0]
 startMarker.bindPopup(`<div>${startbusstop.name}<br>${showbuses(startbusstop.services)}<br><br><button class="confirm">Confirm</button></div>`)
 endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}<br><br><button class="confirm">Confirm</button></div>`)
 
-let routepath: L.GeoJSON
 let busnum: string
 let buscolor: string
 const routeshowntouser: string[] = []
@@ -166,7 +165,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
       map.eachLayer(layer => {
         if (layer instanceof L.Polyline && !(allowedroutes.includes(layer))) map.removeLayer(layer)
       })
-      routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
+      // routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
     })
   })
 }
