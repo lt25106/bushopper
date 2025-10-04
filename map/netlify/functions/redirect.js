@@ -11,4 +11,10 @@ export async function handler(event) {
       headers: { Location: "https://mapbushopper.netlify.app" },
     }
   }
+
+  return {
+    statusCode: 200,
+    headers: { "Content-Type": "text/html" },
+    body: "",
+  };
 }
