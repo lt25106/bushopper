@@ -1,3 +1,6 @@
+const mobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)
+if (mobile) window.location.href = "https://mobilebushopper.netlify.app"
+
 import L from "leaflet"
 
 // npm run build
