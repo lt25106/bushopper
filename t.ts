@@ -85,8 +85,8 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
 const startMarker = L.circleMarker([startbusstop.location[1], startbusstop.location[0]], { color: "red" }).addTo(map)
 const endMarker = L.circleMarker([endbusstop.location[1], endbusstop.location[0]], { color: "red" }).addTo(map)
 
-startMarker.bindPopup(`<div>${startbusstop.name}<br>${showbuses(startbusstop.services)}<br><button class="confirm">Confirm</button></div>`)
-endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}<br><button class="confirm">Confirm</button></div>`)
+startMarker.bindPopup(`<div>${startbusstop.name}<br>${showbuses(startbusstop.services)}<br><br><button class="confirm">Confirm</button></div>`)
+endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}<br><br><button class="confirm">Confirm</button></div>`)
 
 let routepath: L.GeoJSON
 let busnum: string
@@ -137,7 +137,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
           }
           
           const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color: buscolor }).addTo(map)
-          busstopmarker.bindPopup(`<div>${busstop.name}<br>${showbuses(busstop.services)}<br><button class="confirm">Confirm</button></div>`)
+          busstopmarker.bindPopup(`<div>${busstop.name}<br>${showbuses(busstop.services)}<br><br><button class="confirm">Confirm</button></div>`)
           busstopmarker.on("popupopen", attachButtonListeners)
           busstopmarker.on("popupopen", e => {
             routeshowntouser.push(busstop.name)
