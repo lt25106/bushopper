@@ -54,22 +54,6 @@ const [routes, services, stops]: [routes,services,stops] = await Promise.all([
   fetch("https://data.busrouter.sg/v1/services.min.json").then(res => res.json()),
   fetch("https://data.busrouter.sg/v1/stops.min.geojson").then(res => res.json())
 ])
-
-// function busstop(index: number) {
-//   return {
-//     number: stops.features[index].id,
-//     location: stops.features[index].geometry.coordinates,
-//     name: stops.features[index].properties.name,
-//     services: stops.features[index].properties.services,
-//   }
-// }
-
-// const startbusstop = busstop(startindex)
-// const endbusstop = busstop(endindex)
-// const hasbusstopbeenreached = {start: false,end: false}
-
-// const hasrepeatbuses = startbusstop.services.some(r => endbusstop.services.includes(r))
-// if (hasrepeatbuses) location.reload()
   
 const map = L.map('map').setView([1.3521, 103.8198], 10)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
@@ -77,6 +61,11 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
 const startindex = Math.floor(Math.random() * stops["features"].length)
 const endindex = Math.floor(Math.random() * stops["features"].length)
 const footer = document.querySelector("footer")!
+let routeshowntouser = ""
+
+if (stops.features[startindex].properties.services.some(
+  r => stops.features[endindex].properties.services.includes(r)
+)) location.reload()
 
 const startmarker = L.circleMarker([
   stops.features[startindex].geometry.coordinates[1],
@@ -86,6 +75,8 @@ const startmarker = L.circleMarker([
   <h2>${stops.features[startindex].properties.name}</h2>
   <button>${stops.features[startindex].properties.services.join("</button><button>")}</button>
   `
+  routeshowntouser += stops.features[startindex].properties.name
+  busstopreached.start = true
   renderfooter()
 })
 
@@ -97,8 +88,19 @@ const endmarker = L.circleMarker([
   <h2>${stops.features[endindex].properties.name}</h2>
   <button>${stops.features[endindex].properties.services.join("</button><button>")}</button>
   `
+  routeshowntouser += stops.features[endindex].properties.name
+  busstopreached.end = true
   renderfooter()
 })
+
+const allowedmarkers = [startmarker,endmarker]
+const allowedbusroutes: L.GeoJSON[] = []
+const busstopreached = {
+  start: false,
+  end: false
+}
+
+const dialog = document.querySelector("dialog")!
 
 function renderfooter() {
   let currentbusnum = ""
@@ -106,7 +108,7 @@ function renderfooter() {
   footer.querySelectorAll("button").forEach(button => {button.addEventListener("click", () => {
     currentbusnum = button.textContent
     map.eachLayer(layer => {
-      if (layer instanceof L.GeoJSON) map.removeLayer(layer)
+      if (layer instanceof L.GeoJSON && !allowedbusroutes.includes(layer)) map.removeLayer(layer)
     })
     L.geoJSON(
       routes.features.find(
@@ -121,13 +123,38 @@ function renderfooter() {
     footer.appendChild(confirmbutton)
 
     confirmbutton.addEventListener("click",e => {
-      services[currentbusnum].routes.flat().forEach(busstopnumber => {
-        L.circleMarker([
-          stops.features.find(feature => feature.id == busstopnumber)!.geometry.coordinates[1],
-          stops.features.find(feature => feature.id == busstopnumber)!.geometry.coordinates[0]
-        ], {color}).addTo(map)
+      routeshowntouser += " → " + currentbusnum
+      map.eachLayer(layer => {
+        if (layer instanceof L.GeoJSON) allowedbusroutes.push(layer)
       })
-      footer.style.bottom = `-${footer.scrollHeight}px`
+      services[currentbusnum].routes.flat().forEach(busstopnumber => {
+        if (busstopnumber == stops.features[startindex].id) busstopreached.start = true
+        if (busstopnumber == stops.features[endindex].id) busstopreached.end = true
+        if (busstopreached.start && busstopreached.end) {
+          dialog.querySelector("span")!.textContent = routeshowntouser
+          dialog.showModal()
+          return
+        }
+        const busstop = stops.features.find(feature => feature.id == busstopnumber)!
+        L.circleMarker([
+          busstop.geometry.coordinates[1],
+          busstop.geometry.coordinates[0]
+        ], {color}).addTo(map).on("click", e => {
+          routeshowntouser += "→" + busstop.properties.name
+          footer.innerHTML = `
+          <h2>${busstop.properties.name}</h2>
+          <button>${busstop.properties.services.join("</button><button>")}</button>
+          `
+          allowedmarkers.push(e.target)
+          renderfooter()
+          map.eachLayer(layer => {
+            if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
+          })
+        })
+        
+      })
+      footer.style.bottom = "-50vh"
+      setTimeout(() => {footer.textContent = ""}, 30)
       startmarker.off("click")
       endmarker.off("click")
     })
