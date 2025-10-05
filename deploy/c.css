@@ -47,9 +47,6 @@ h1 {
   border-radius: 9e9rem;
   margin: 0.25rem;
   padding: 0.25rem 0.5rem;
-  background-color: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(0.25rem);
-  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.25);
 }
 dialog {
   z-index: 100;
@@ -89,7 +86,7 @@ dialog img:hover {
   max-width: fit-content;
   font-family: "LTAIdentity", sans-serif;
 }
-.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+.leaflet-popup-content-wrapper, .leaflet-popup-tip, h1, footer {
   background-color: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(0.25rem);
   box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.25);
@@ -100,30 +97,42 @@ button {
   background-color: hsl(76, 59%, 53%);
   color: black;
   border: none;
-  margin: 0 0.125rem;
+  margin: 0.125rem;
   transition: background-color 0.25s;
   font-family: "LTAIdentity", sans-serif;
   border-radius: 9e9rem;
   font-size: 2.75rem;
-}
-button:hover {
-  background-color: hsl(76, 59%, 70%);
 }
 button:active {
   background-color: hsl(76, 59%, 36%);
 }
 
 .confirm {
-  display: none;
   background-color: hsl(256, 59%, 53%);
   color: white;
   font-family: sans-serif;
 }
-.confirm:hover {
-  background-color: hsl(256, 59%, 70%);
-  color: black
-}
 .confirm:active {
   background-color: hsl(256, 59%, 36%);
   color: white
+}
+
+footer {
+  position: absolute;
+  bottom: -100%;
+  transition: bottom 0.3s;
+  z-index: 99;
+  text-align: center;
+  width: 100vw;
+  font-family: "LTAIdentity", sans-serif;
+  border-top-left-radius: 2rem;
+  border-top-right-radius: 2rem;
+  max-height: 50vh;
+  overflow-y: scroll;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 100;
 }

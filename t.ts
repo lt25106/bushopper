@@ -10,7 +10,6 @@ type fullbusstop = {
   location: point,
   name: string,
   services: string[],
-  road: string
 }
 type routes = {
   type: "FeatureCollection",
@@ -51,152 +50,87 @@ type stops = {
 }
 
 const [routes, services, stops]: [routes,services,stops] = await Promise.all([
-  fetch("https://data.busrouter.sg/v1/routes.geojson").then(res => res.json()),
-  fetch("https://data.busrouter.sg/v1/services.json").then(res => res.json()),
-  fetch("https://data.busrouter.sg/v1/stops.geojson").then(res => res.json())
+  fetch("https://data.busrouter.sg/v1/routes.min.geojson").then(res => res.json()),
+  fetch("https://data.busrouter.sg/v1/services.min.json").then(res => res.json()),
+  fetch("https://data.busrouter.sg/v1/stops.min.geojson").then(res => res.json())
 ])
 
+// function busstop(index: number) {
+//   return {
+//     number: stops.features[index].id,
+//     location: stops.features[index].geometry.coordinates,
+//     name: stops.features[index].properties.name,
+//     services: stops.features[index].properties.services,
+//   }
+// }
+
+// const startbusstop = busstop(startindex)
+// const endbusstop = busstop(endindex)
+// const hasbusstopbeenreached = {start: false,end: false}
+
+// const hasrepeatbuses = startbusstop.services.some(r => endbusstop.services.includes(r))
+// if (hasrepeatbuses) location.reload()
+  
+const map = L.map('map').setView([1.3521, 103.8198], 10)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
 
 const startindex = Math.floor(Math.random() * stops["features"].length)
 const endindex = Math.floor(Math.random() * stops["features"].length)
+const footer = document.querySelector("footer")!
 
-const startbusstop: fullbusstop = {
-  number: stops.features[startindex].id,
-  location: stops.features[startindex].geometry.coordinates,
-  name: stops.features[startindex].properties.name,
-  services: stops.features[startindex].properties.services,
-  road: stops.features[startindex].properties.road
-}
-const endbusstop: fullbusstop = {
-  number: stops.features[endindex].id,
-  location: stops.features[endindex].geometry.coordinates,
-  name: stops.features[endindex].properties.name,
-  services: stops.features[endindex].properties.services,
-  road: stops.features[endindex].properties.road
-}
+const startmarker = L.circleMarker([
+  stops.features[startindex].geometry.coordinates[1],
+  stops.features[startindex].geometry.coordinates[0]
+],{color: "red"}).addTo(map).on("click", e => {
+  footer.innerHTML = `
+  <h2>${stops.features[startindex].properties.name}</h2>
+  <button>${stops.features[startindex].properties.services.join("</button><button>")}</button>
+  `
+  renderfooter()
+})
 
-const hasbusstopbeenreached = {start: false,end: false}
+const endmarker = L.circleMarker([
+  stops.features[endindex].geometry.coordinates[1],
+  stops.features[endindex].geometry.coordinates[0]
+],{color: "red"}).addTo(map).on("click", e => {
+  footer.innerHTML = `
+  <h2>${stops.features[endindex].properties.name}</h2>
+  <button>${stops.features[endindex].properties.services.join("</button><button>")}</button>
+  `
+  renderfooter()
+})
 
-const hasrepeatbuses = startbusstop.services.some(r => endbusstop.services.includes(r))
-if (hasrepeatbuses) location.reload()
-  
-const map = L.map('map').setView([1.3521, 103.8198], 12)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
-const startMarker = L.circleMarker([startbusstop.location[1], startbusstop.location[0]], { color: "red" }).addTo(map)
-const endMarker = L.circleMarker([endbusstop.location[1], endbusstop.location[0]], { color: "red" }).addTo(map)
-
-startMarker.bindPopup(`<div>${startbusstop.name}<br>${showbuses(startbusstop.services)}<br><br><button class="confirm">Confirm</button></div>`)
-endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}<br><br><button class="confirm">Confirm</button></div>`)
-
-let busnum: string
-let buscolor: string
-const routeshowntouser: string[] = []
-const allowedmarkers = [startMarker, endMarker]
-const allowedroutes: L.Polyline[] = []
-
-startMarker.on("popupopen", attachButtonListeners)
-endMarker.on("popupopen", attachButtonListeners)
-
-const dialog = document.querySelector("dialog") as HTMLDialogElement
-const span = dialog.querySelector("span:not(#copied)") as HTMLSpanElement
-
-function attachButtonListeners(marker: L.PopupEvent) {
-  if (marker.target == startMarker) {
-    endMarker.unbindPopup()
-    hasbusstopbeenreached.start = true
-    if (routeshowntouser.at(-1) != startbusstop.name) routeshowntouser.push(startbusstop.name)
-  } else if (marker.target == endMarker) {
-    startMarker.unbindPopup()
-    hasbusstopbeenreached.end = true
-    if (routeshowntouser.at(-1) != endbusstop.name) routeshowntouser.push(endbusstop.name)
-  }
-  
-  document.querySelectorAll("button").forEach(button => {
-    const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 37.5 + 12.5}%)`
-    if (button.dataset.eventlisteneradded) return
-    button.addEventListener("click", () => {
-      button.dataset.eventlisteneradded = "true"
-      if (button.textContent == "Confirm") {
-        routeshowntouser.push(busnum)
-        map.eachLayer(layer => {
-          if (layer instanceof L.Polyline) allowedroutes.push(layer)
-        })
-        map.closePopup()
-        const routes = services[busnum].routes
-        const busstops = routes[1] ? routes[0].concat(routes[1]) : routes[0]
-        
-        busstops.forEach(busstopnum => {
-          if (busstopnum == startbusstop.number || busstopnum == endbusstop.number) return
-          
-          const filtered = stops.features.find(feat => feat.id == busstopnum)!
-          const busstop = {
-            name: filtered.properties.name,
-            services: filtered.properties.services,
-            location: filtered.geometry.coordinates
-          }
-          
-          const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color: buscolor }).addTo(map)
-          busstopmarker.bindPopup(`<div>${busstop.name}<br>${showbuses(busstop.services)}<br><br><button class="confirm">Confirm</button></div>`)
-          busstopmarker.on("popupopen", attachButtonListeners)
-          busstopmarker.on("popupopen", e => {
-            routeshowntouser.push(busstop.name)
-            allowedmarkers.push(e.target)
-            cleanupMarkers(e.target)
-          })
-        })
-        const busroute = services[busnum].routes.flat()
-        if (busroute.includes(endbusstop.number) && !hasbusstopbeenreached.end) {
-          hasbusstopbeenreached.end = true
-          routeshowntouser.push(endbusstop.name)
-        }
-        if (busroute.includes(startbusstop.number) && !hasbusstopbeenreached.start) {
-          hasbusstopbeenreached.start = true
-          routeshowntouser.push(startbusstop.name)
-        }
-        if (hasbusstopbeenreached.start && hasbusstopbeenreached.end) {
-          span.textContent = routeshowntouser.join(" → ")
-          dialog.showModal()
-        }
-        return
-      }
-      buscolor = color
-      busnum = button.textContent;
-      (<HTMLButtonElement>marker.popup.getElement()!.querySelector(".confirm")).style.display = "inline"
-      map.eachLayer(layer => {
-        if (layer instanceof L.Polyline && !(allowedroutes.includes(layer))) map.removeLayer(layer)
-      })
-      // routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
+function renderfooter() {
+  let currentbusnum = ""
+  const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 37.5 + 12.5}%)`
+  footer.querySelectorAll("button").forEach(button => {button.addEventListener("click", () => {
+    currentbusnum = button.textContent
+    map.eachLayer(layer => {
+      if (layer instanceof L.GeoJSON) map.removeLayer(layer)
     })
-  })
-}
+    L.geoJSON(
+      routes.features.find(
+        feature => feature.properties.number == button.textContent
+      )?.geometry, {style: {color}}
+    ).addTo(map)
+    if (footer.getElementsByClassName("confirm")[0]) return
+    const confirmbutton = document.createElement("button")
+    confirmbutton.classList.add("confirm")
+    confirmbutton.textContent = "Confirm"
+    footer.appendChild(document.createElement("br"))
+    footer.appendChild(confirmbutton)
 
-function getroutepath(num: string) {
-  const matches = routes.features.filter(feat => feat.properties.number == num)
-  if (matches.length == 0) return
-  
-  const multiCoords = matches.map(feat => feat.geometry.coordinates)
-  
-  return {
-    type: "Feature",
-    geometry: {
-      type: "MultiLineString",
-      coordinates: multiCoords
-    },
-    properties: {}
-  } as GeoJSON.Feature
-}
-
-function showbuses(array: string[]) {
-  let result = ""
-  array.forEach(bus => {
-    result += `<button>${bus}</button>`
-  })
-  return result
-}
-
-function cleanupMarkers(target: any) {
-  map.eachLayer(layer => {
-    if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
-    if (layer != target) layer.unbindPopup()
-  })
+    confirmbutton.addEventListener("click",e => {
+      services[currentbusnum].routes.flat().forEach(busstopnumber => {
+        L.circleMarker([
+          stops.features.find(feature => feature.id == busstopnumber)!.geometry.coordinates[1],
+          stops.features.find(feature => feature.id == busstopnumber)!.geometry.coordinates[0]
+        ], {color}).addTo(map)
+      })
+      footer.style.bottom = `-${footer.scrollHeight}px`
+      startmarker.off("click")
+      endmarker.off("click")
+    })
+  })})
+  footer.style.bottom = "0"
 }
