@@ -5,12 +5,6 @@ import L from "leaflet"
 
 type point = [number, number]
 type line = point[]
-type fullbusstop = {
-  number: string,
-  location: point,
-  name: string,
-  services: string[],
-}
 type routes = {
   type: "FeatureCollection",
   features: {
