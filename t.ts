@@ -128,8 +128,14 @@ function renderfooter() {
         if (layer instanceof L.GeoJSON) allowedbusroutes.push(layer)
       })
       services[currentbusnum].routes.flat().forEach(busstopnumber => {
-        if (busstopnumber == stops.features[startindex].id) busstopreached.start = true
-        if (busstopnumber == stops.features[endindex].id) busstopreached.end = true
+        if (busstopnumber == stops.features[startindex].id && !routeshowntouser.includes(stops.features[startindex].properties.name)) {
+          busstopreached.start = true
+          routeshowntouser += " → " + stops.features[startindex].properties.name
+        }
+        if (busstopnumber == stops.features[endindex].id && !routeshowntouser.includes(stops.features[endindex].properties.name)) {
+          busstopreached.end = true
+          routeshowntouser += " → " + stops.features[endindex].properties.name
+        }
         if (busstopreached.start && busstopreached.end) {
           dialog.querySelector("span")!.textContent = routeshowntouser
           dialog.showModal()
@@ -140,7 +146,7 @@ function renderfooter() {
           busstop.geometry.coordinates[1],
           busstop.geometry.coordinates[0]
         ], {color}).addTo(map).on("click", e => {
-          routeshowntouser += "→" + busstop.properties.name
+          routeshowntouser += " → " + busstop.properties.name
           footer.innerHTML = `
           <h2>${busstop.properties.name}</h2>
           <button>${busstop.properties.services.join("</button><button>")}</button>
@@ -164,7 +170,7 @@ function renderfooter() {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
+    navigator.serviceWorker.register('service-worker.js')
       .then((registration) => {
         console.log('Service Worker registered with scope:', registration.scope);
       })
