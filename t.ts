@@ -65,6 +65,7 @@ const startmarker = L.circleMarker([
   stops.features[startindex].geometry.coordinates[1],
   stops.features[startindex].geometry.coordinates[0]
 ],{color: "red"}).addTo(map).on("click", e => {
+  endmarker.off("click")
   footer.innerHTML = `
   <h2>${stops.features[startindex].properties.name}</h2>
   <button>${stops.features[startindex].properties.services.join("</button><button>")}</button>
@@ -78,6 +79,7 @@ const endmarker = L.circleMarker([
   stops.features[endindex].geometry.coordinates[1],
   stops.features[endindex].geometry.coordinates[0]
 ],{color: "red"}).addTo(map).on("click", e => {
+  startmarker.off("click")
   footer.innerHTML = `
   <h2>${stops.features[endindex].properties.name}</h2>
   <button>${stops.features[endindex].properties.services.join("</button><button>")}</button>
