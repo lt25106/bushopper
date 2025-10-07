@@ -2,6 +2,7 @@ const mobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)
 if (mobile) window.location.href = "https://mobilebushopper.netlify.app"
 
 import L from "leaflet"
+import { maptilerLayer, MapStyle } from "@maptiler/leaflet-maptilersdk"
 
 // npm run build
 type point = [number, number]
@@ -82,7 +83,10 @@ const hasrepeatbuses = startbusstop.services.some(r => endbusstop.services.inclu
 if (hasrepeatbuses) location.reload()
   
 const map = L.map('map').setView([1.3521, 103.8198], 12)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
+maptilerLayer({
+  apiKey: "iBKpu3YshpPXQzg7ZH1Y",
+  style: MapStyle.OPENSTREETMAP
+}).addTo(map)
 const startMarker = L.circleMarker([startbusstop.location[1], startbusstop.location[0]], { color: "red" }).addTo(map)
 const endMarker = L.circleMarker([endbusstop.location[1], endbusstop.location[0]], { color: "red" }).addTo(map)
 
