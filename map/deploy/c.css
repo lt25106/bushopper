@@ -82,7 +82,7 @@ dialog img:hover {
 }
 
 /* leaflet */
-.leaflet-control, [href="https://www.maptiler.com"] {
+.leaflet-control, [href="https://www.maptiler.com"], .maplibregl-control-container {
   display: none;
 }
 
