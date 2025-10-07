@@ -2,7 +2,7 @@ const mobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)
 if (!mobile) window.location.href = "https://mapbushopper.netlify.app"
 
 import L from "leaflet"
-
+import { maptilerLayer, MapStyle } from "@maptiler/leaflet-maptilersdk"
 type point = [number, number]
 type line = point[]
 type routes = {
@@ -50,7 +50,10 @@ const [routes, services, stops]: [routes,services,stops] = await Promise.all([
 ])
   
 const map = L.map('map').setView([1.3521, 103.8198], 10)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
+maptilerLayer({
+  apiKey: "iBKpu3YshpPXQzg7ZH1Y",
+  style: MapStyle.OPENSTREETMAP
+}).addTo(map)
 
 const startindex = Math.floor(Math.random() * stops["features"].length)
 const endindex = Math.floor(Math.random() * stops["features"].length)
