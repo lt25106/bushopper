@@ -130,6 +130,9 @@ function attachButtonListeners(marker: L.PopupEvent) {
     })
     
     button.addEventListener("click", () => {
+      console.log(
+        stops.features.find(feature => feature.properties.name == button.parentElement?.innerHTML.split("<")[0])?.geometry.coordinates
+      )
       routeshowntouser.push(button.textContent)
       const busroute = services[busnum].routes.flat()
       if (busroute.includes(endbusstop.number) && !hasbusstopbeenreached.end) {
@@ -145,8 +148,8 @@ function attachButtonListeners(marker: L.PopupEvent) {
         dialog.showModal()
       }
         triggeredByClick = true
-      const routes = services[button.textContent].routes
-      const busstops = routes[1] ? routes[0].concat(routes[1]) : routes[0]
+      const busroutes = services[button.textContent].routes
+      const busstops = busroutes[1] ? busroutes[0].concat(busroutes[1]) : busroutes[0]
       
       busstops.forEach(busstopnum => {
         if (busstopnum == startbusstop.number || busstopnum == endbusstop.number) return
