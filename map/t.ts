@@ -53,9 +53,9 @@ type stops = {
 }
 
 const [routes, services, stops]: [routes,services,stops] = await Promise.all([
-  fetch("https://data.busrouter.sg/v1/routes.geojson").then(res => res.json()),
-  fetch("https://data.busrouter.sg/v1/services.json").then(res => res.json()),
-  fetch("https://data.busrouter.sg/v1/stops.geojson").then(res => res.json())
+  fetch("https://data.busrouter.sg/v1/routes.min.geojson").then(res => res.json()),
+  fetch("https://data.busrouter.sg/v1/services.min.json").then(res => res.json()),
+  fetch("https://data.busrouter.sg/v1/stops.min.geojson").then(res => res.json())
 ])
 
 
@@ -90,8 +90,8 @@ maptilerLayer({
 const startMarker = L.circleMarker([startbusstop.location[1], startbusstop.location[0]], { color: "red" }).addTo(map)
 const endMarker = L.circleMarker([endbusstop.location[1], endbusstop.location[0]], { color: "red" }).addTo(map)
 
-startMarker.bindPopup(`<div>${startbusstop.name}<br>${showbuses(startbusstop.services)}</div>`)
-endMarker.bindPopup(`<div>${endbusstop.name}<br>${showbuses(endbusstop.services)}</div>`)
+startMarker.bindPopup(`<div>${startbusstop.name}<br><button>${startbusstop.services.join("</button><button>")}</button></div>`)
+endMarker.bindPopup(`<div>${endbusstop.name}<br><button>${endbusstop.services.join("</button><button>")}</button></div>`)
 
 let routepath: L.GeoJSON
 let busnum: string
@@ -159,10 +159,10 @@ function attachButtonListeners(marker: L.PopupEvent) {
         }
         
         const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color }).addTo(map)
-        busstopmarker.bindPopup(`<div>${busstop.name}<br>${showbuses(busstop.services)}</div>`)
+        busstopmarker.bindPopup(`<div>${busstop.name}<br><button>${busstop.services.join("</button><button>")}</button></div>`)
         busstopmarker.on("popupopen", attachButtonListeners)
         busstopmarker.on("popupopen", e => {
-          routeshowntouser.push(busstop.name)
+          if (routeshowntouser.at(-1) != busstop.name) routeshowntouser.push(busstop.name)
           allowedmarkers.push(e.target)
           cleanupMarkers(e.target)
         })
@@ -194,12 +194,4 @@ function getroutepath(num: string) {
     },
     properties: {}
   } as GeoJSON.Feature
-}
-
-function showbuses(array: string[]) {
-  let result = ""
-  array.forEach(bus => {
-    result += `<button>${bus}</button>`
-  })
-  return result
 }
