@@ -51,6 +51,7 @@ type stops = {
     }
   }[]
 }
+type Acc = { point: [number, number]; d: number } | null
 
 const [routes, services, stops]: [routes,services,stops] = await Promise.all([
   fetch("https://data.busrouter.sg/v1/routes.min.geojson").then(res => res.json()),
@@ -197,4 +198,27 @@ function getroutepath(num: string) {
     },
     properties: {}
   } as GeoJSON.Feature
+}
+
+function closestPointOnPolyline(p: point, polyline: line) {
+  const [xp, yp] = p
+
+  return polyline
+    .slice(0, -1)
+    .map((_, i) => {
+      const [x1, y1] = polyline[i]
+      const [x2, y2] = polyline[i + 1]
+
+      if (x1 === x2) return [x1, yp] as [number, number]
+      if (y1 === y2) return [xp, y1] as [number, number]
+
+      const m = (y2 - y1) / (x2 - x1)
+      const xf = (m * m * (yp - y1) + m * m * m * x1 + xp) / (m * m + 1)
+      const yf = m * xf + y1 - m * x1
+      return [xf, yf] as [number, number]
+    })
+    .reduce<Acc>((best, q) => {
+      const d = (xp - q[0]) ** 2 + (yp - q[1]) ** 2
+      return !best || d < best.d ? { point: q, d } : best
+    }, null)!.point
 }
