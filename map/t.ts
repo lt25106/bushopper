@@ -51,7 +51,7 @@ type stops = {
     }
   }[]
 }
-type Acc = { point: [number, number]; d: number } | null
+type Acc = { point: [number, number]; d: number }
 
 const [routes, services, stops]: [routes,services,stops] = await Promise.all([
   fetch("https://data.busrouter.sg/v1/routes.min.geojson").then(res => res.json()),
@@ -94,7 +94,7 @@ const endMarker = L.circleMarker([endbusstop.location[1], endbusstop.location[0]
 startMarker.bindPopup(`<div>${startbusstop.name}<br><button>${startbusstop.services.join("</button><button>")}</button></div>`)
 endMarker.bindPopup(`<div>${endbusstop.name}<br><button>${endbusstop.services.join("</button><button>")}</button></div>`)
 
-let routepath: L.GeoJSON
+let routeonmap: L.Polyline
 let busnum: string
 const routeshowntouser: string[] = []
 const allowedmarkers = [startMarker, endMarker]
@@ -121,19 +121,22 @@ function attachButtonListeners(marker: L.PopupEvent) {
     const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 77.5 + 12.5}%)`
     
     button.addEventListener("mouseover", () => {
-      routepath = L.geoJSON(getroutepath(button.textContent), { style: { color } }).addTo(map)
+      routeonmap = L.polyline(getroutepath(button.textContent), { color }).addTo(map)
       busnum = button.textContent
       triggeredByClick = false
     })
     
     button.addEventListener("mouseout", () => {
-      if (!triggeredByClick) map.removeLayer(routepath)
+      if (!triggeredByClick) map.removeLayer(routeonmap)
     })
     
     button.addEventListener("click", () => {
-      console.log(
-        stops.features.find(feature => feature.properties.name == button.parentElement?.innerHTML.split("<")[0])?.geometry.coordinates
-      )
+      const route = routes.features.find(feature => feature.properties.number == button.textContent)!
+      
+      const busstopcoords = stops.features.find(feature => feature.properties.name == button.parentElement?.innerHTML.split("<")[0])!.geometry.coordinates
+      const routecoords = route.geometry.coordinates
+      const pointonline = route.geometry.coordinates[closestPointOnPolyline(busstopcoords,routecoords).index]
+      // console.log(closestPointOnPolyline(busstopcoords,routecoords))
       routeshowntouser.push(button.textContent)
       const busroute = services[busnum].routes.flat()
       if (busroute.includes(endbusstop.number) && !hasbusstopbeenreached.end) {
@@ -148,7 +151,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
         span.textContent = routeshowntouser.join(" → ")
         dialog.showModal()
       }
-        triggeredByClick = true
+      triggeredByClick = true
       const busroutes = services[button.textContent].routes
       const busstops = busroutes[1] ? busroutes[0].concat(busroutes[1]) : busroutes[0]
       
@@ -166,6 +169,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
         busstopmarker.bindPopup(`<div>${busstop.name}<br><button>${busstop.services.join("</button><button>")}</button></div>`)
         busstopmarker.on("popupopen", attachButtonListeners)
         busstopmarker.on("popupopen", e => {
+          // console.log(closestPointOnPolyline(busstop.location,routecoords))
           if (routeshowntouser.at(-1) != busstop.name) routeshowntouser.push(busstop.name)
           allowedmarkers.push(e.target)
           cleanupMarkers(e.target)
@@ -175,7 +179,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
       map.closePopup()
     })
   })
-}
+} 
 
 function cleanupMarkers(target: any) {
   map.eachLayer(layer => {
@@ -184,41 +188,42 @@ function cleanupMarkers(target: any) {
   })
 }
 
-function getroutepath(num: string) {
-  const matches = routes.features.filter(feat => feat.properties.number == num)
-  if (matches.length == 0) return
-  
-  const multiCoords = matches.map(feat => feat.geometry.coordinates)
-  
-  return {
-    type: "Feature",
-    geometry: {
-      type: "MultiLineString",
-      coordinates: multiCoords
-    },
-    properties: {}
-  } as GeoJSON.Feature
+function getroutepath(num: string): line {
+  return <line>(routes.features.filter(f => f.properties.number == num).flatMap(f => f.geometry.coordinates).map(([lng, lat]) => [lat, lng]))
 }
 
-function closestPointOnPolyline(p: point, polyline: line) {
-  const [xp, yp] = p
+function closestPointOnPolyline(point: [number, number], polyline: [number, number][]) {
+  const [px, py] = point
 
-  return polyline
-    .slice(0, -1)
-    .map((_, i) => {
-      const [x1, y1] = polyline[i]
-      const [x2, y2] = polyline[i + 1]
+  let closest = { point: [0, 0] as [number, number], distance: Infinity, segmentIndex: -1 }
 
-      if (x1 === x2) return [x1, yp] as [number, number]
-      if (y1 === y2) return [xp, y1] as [number, number]
+  for (let i = 0; i < polyline.length - 1; i++) {
+    const [x1, y1] = polyline[i]
+    const [x2, y2] = polyline[i + 1]
 
-      const m = (y2 - y1) / (x2 - x1)
-      const xf = (m * m * (yp - y1) + m * m * m * x1 + xp) / (m * m + 1)
-      const yf = m * xf + y1 - m * x1
-      return [xf, yf] as [number, number]
-    })
-    .reduce<Acc>((best, q) => {
-      const d = (xp - q[0]) ** 2 + (yp - q[1]) ** 2
-      return !best || d < best.d ? { point: q, d } : best
-    }, null)!.point
+    let closestX: number
+    let closestY: number
+
+    if (x1 == x2) {
+      closestX = x1
+      closestY = py
+    } else if (y1 == y2) {
+      closestX = px
+      closestY = y1
+    } else {
+      const slope = (y2 - y1) / (x2 - x1)
+      closestX = (slope * slope * (py - y1) + slope * slope * slope * x1 + px) / (slope * slope + 1)
+      closestY = slope * closestX + y1 - slope * x1
+    }
+
+    const dx = px - closestX
+    const dy = py - closestY
+    const distSq = dx * dx + dy * dy
+
+    if (distSq < closest.distance) {
+      closest = { point: [closestX, closestY], distance: distSq, segmentIndex: i }
+    }
+  }
+
+  return { point: closest.point, index: closest.segmentIndex }
 }
