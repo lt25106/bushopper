@@ -135,8 +135,8 @@ function attachButtonListeners(marker: L.PopupEvent) {
       
       const busstopcoords = stops.features.find(feature => feature.properties.name == button.parentElement?.innerHTML.split("<")[0])!.geometry.coordinates
       const routecoords = route.geometry.coordinates
-      const pointonline = route.geometry.coordinates[closestPointOnPolyline(busstopcoords,routecoords).index]
-      // console.log(closestPointOnPolyline(busstopcoords,routecoords))
+      // const pointonline = route.geometry.coordinates[closestPointOnPolyline(busstopcoords,routecoords).index]
+      // console.log()
       routeshowntouser.push(button.textContent)
       const busroute = services[busnum].routes.flat()
       if (busroute.includes(endbusstop.number) && !hasbusstopbeenreached.end) {
@@ -170,6 +170,10 @@ function attachButtonListeners(marker: L.PopupEvent) {
         busstopmarker.on("popupopen", attachButtonListeners)
         busstopmarker.on("popupopen", e => {
           // console.log(closestPointOnPolyline(busstop.location,routecoords))
+          const filpedcoords = <line>(routecoords
+            .slice(closestPointOnPolyline(busstopcoords,routecoords).index,-1)
+            .map(coord => [coord[1],coord[0]]))
+          // routeonmap.setLatLngs(filpedcoords).addTo(map)
           if (routeshowntouser.at(-1) != busstop.name) routeshowntouser.push(busstop.name)
           allowedmarkers.push(e.target)
           cleanupMarkers(e.target)
