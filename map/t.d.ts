@@ -44,3 +44,7 @@ type stops = {
     }
   }[]
 }
+type pointstocrop = {
+  point: point,
+  lineindex: number
+}

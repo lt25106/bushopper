@@ -47,6 +47,7 @@ endMarker.bindPopup(`<div>${endbusstop.name}<br><button>${endbusstop.services.jo
 
 let routeonmap: L.Polyline
 let busnum: string
+const twopointsonmap: [pointstocrop?, pointstocrop?] = []
 const routeshowntouser: string[] = []
 const allowedmarkers = [startMarker, endMarker]
 
@@ -57,6 +58,17 @@ const dialog = document.querySelector("dialog") as HTMLDialogElement
 const span = dialog.querySelector("span:not(.copied)") as HTMLSpanElement
 
 function attachButtonListeners(marker: L.PopupEvent) {
+  if (busnum) {
+    const busroutepoints: line = routes.features.find(f => f.properties.number == busnum)!.geometry.coordinates
+    const busstopcoords: point = [marker.target.getLatLng().lng, marker.target.getLatLng().lat]
+    twopointsonmap[1] = closestPointOnPolyline(busstopcoords, busroutepoints)
+    console.log(twopointsonmap)
+    const newlnglats = (twopointsonmap[0]?.lineindex! > twopointsonmap[1]?.lineindex)
+    ? busroutepoints.slice(twopointsonmap[1]?.lineindex,twopointsonmap[0]?.lineindex)
+    : busroutepoints.slice(twopointsonmap[0]?.lineindex,twopointsonmap[1]?.lineindex)
+    routeonmap.setLatLngs(newlnglats.map(([lng, lat]) => [lat, lng]))
+  }
+
   if (marker.target == startMarker) {
     endMarker.unbindPopup()
     hasbusstopbeenreached.start = true
@@ -69,7 +81,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
 
   document.querySelectorAll("button").forEach(button => {
     let triggeredByClick: boolean
-    const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 77.5 + 12.5}%)`
+    const color = `hsl(${Math.random() * 360},${Math.random() * 80 + 20}%,${Math.random() * 37.5 + 12.5}%)`
 
     button.addEventListener("mouseover", () => {
       routeonmap = L.polyline(getroutepath(button.textContent!), { color }).addTo(map)
@@ -85,9 +97,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
       const busroutepoints: line = routes.features
         .find(f => f.properties.number == button.textContent)!.geometry.coordinates
       const busstopcoords: point = [marker.target.getLatLng().lng, marker.target.getLatLng().lat]
-      console.log(closestPointOnPolyline(busstopcoords, busroutepoints))
-      const pointcoords = closestPointOnPolyline(busstopcoords, busroutepoints).point
-      // L.marker([pointcoords[1], pointcoords[0]]).addTo(map)
+      twopointsonmap[0] = closestPointOnPolyline(busstopcoords, busroutepoints)
 
       routeshowntouser.push(button.textContent!)
       const busroute = services[busnum].routes.flat()
