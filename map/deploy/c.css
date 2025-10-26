@@ -117,3 +117,17 @@ button:hover {
 button:active {
   background-color: hsl(var(--color), 59%, 36%);
 }
+
+body > dialog > span:first-child {
+  float: right;
+  background-color: hsl(0,100%,50%);
+  margin-right: 1.75rem;
+  border-radius: 9e9rem;
+  transition: background-color 0.25s;
+}
+body > dialog > span:first-child:hover {
+  background-color: hsl(0,100%,67%);
+}
+body > dialog > span:first-child:active {
+  background-color: hsl(0,100%,33%);
+}

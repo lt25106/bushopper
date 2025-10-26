@@ -11,9 +11,9 @@
   <h1>BusHopper</h1>
   <img src="loading.svg">
   <dialog>
-    You have reached the destination! Your route:<br>
-    <span></span><br>
-    <img src="copy.svg" onclick="navigator.clipboard.writeText(document.querySelector('span').textContent);document.getElementById('copied').style.display='inline'">
+    You have reached the destination! Your route:<span onclick="document.querySelector('dialog').close()">&nbsp;x&nbsp;</span><br>
+    <span id="route"></span><br>
+    <img src="copy.svg" onclick="navigator.clipboard.writeText(document.getElementById('route').textContent);document.getElementById('copied').style.display='inline'">
     <span id="copied">Copied!</span>
     <a href="./"><img src="restart.svg"></a>
   </dialog>

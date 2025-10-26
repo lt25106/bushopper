@@ -36,7 +36,7 @@ if (hasrepeatbuses) location.reload()
 const map = L.map("map").setView([1.3521, 103.8198], 12)
 maptilerLayer({
   apiKey: "iBKpu3YshpPXQzg7ZH1Y",
-  style: MapStyle.OPENSTREETMAP
+  style: MapStyle.OPENSTREETMAP,
 }).addTo(map)
 
 const startMarker = L.circleMarker([startbusstop.location[1], startbusstop.location[0]], { color: "red" }).addTo(map)
@@ -55,14 +55,13 @@ startMarker.on("popupopen", attachButtonListeners)
 endMarker.on("popupopen", attachButtonListeners)
 
 const dialog = document.querySelector("dialog") as HTMLDialogElement
-const span = dialog.querySelector("span:not(.copied)") as HTMLSpanElement
+const span = document.getElementById("route") as HTMLSpanElement
 
 function attachButtonListeners(marker: L.PopupEvent) {
   if (busnum) {
     const busroutepoints: line = routes.features.find(f => f.properties.number == busnum)!.geometry.coordinates
     const busstopcoords: point = [marker.target.getLatLng().lng, marker.target.getLatLng().lat]
     twopointsonmap[1] = closestPointOnPolyline(busstopcoords, busroutepoints)
-    console.log(twopointsonmap)
     const newlnglats = (twopointsonmap[0]?.lineindex! > twopointsonmap[1]?.lineindex)
     ? busroutepoints.slice(twopointsonmap[1]?.lineindex,twopointsonmap[0]?.lineindex)
     : busroutepoints.slice(twopointsonmap[0]?.lineindex,twopointsonmap[1]?.lineindex)
@@ -94,6 +93,8 @@ function attachButtonListeners(marker: L.PopupEvent) {
     })
 
     button.addEventListener("click", () => {
+      let lastselected = ""
+
       const busroutepoints: line = routes.features
         .find(f => f.properties.number == button.textContent)!.geometry.coordinates
       const busstopcoords: point = [marker.target.getLatLng().lng, marker.target.getLatLng().lat]
@@ -104,16 +105,29 @@ function attachButtonListeners(marker: L.PopupEvent) {
       if (busroute.includes(endbusstop.number) && !hasbusstopbeenreached.end) {
         hasbusstopbeenreached.end = true
         routeshowntouser.push(endbusstop.name)
+        lastselected = endbusstop.number
       }
       if (busroute.includes(startbusstop.number) && !hasbusstopbeenreached.start) {
         hasbusstopbeenreached.start = true
         routeshowntouser.push(startbusstop.name)
+        lastselected = startbusstop.number
       }
+
+      triggeredByClick = true
+
       if (hasbusstopbeenreached.start && hasbusstopbeenreached.end) {
         span.textContent = routeshowntouser.join(" → ")
+        const busroutepoints: line = routes.features.find(f => f.properties.number == busnum)!.geometry.coordinates
+        const busstopcoords: point = (lastselected == endbusstop.number) ? endbusstop.location : startbusstop.location
+        twopointsonmap[1] = closestPointOnPolyline(busstopcoords, busroutepoints)
+        const newlnglats = (twopointsonmap[0]?.lineindex! > twopointsonmap[1]?.lineindex)
+        ? busroutepoints.slice(twopointsonmap[1]?.lineindex,twopointsonmap[0]?.lineindex)
+        : busroutepoints.slice(twopointsonmap[0]?.lineindex,twopointsonmap[1]?.lineindex)
+        routeonmap.setLatLngs(newlnglats.map(([lng, lat]) => [lat, lng]))
         dialog.showModal()
+        return
       }
-      triggeredByClick = true
+
       const busroutes = services[button.textContent!].routes
       const busstops = busroutes[1] ? busroutes[0].concat(busroutes[1]) : busroutes[0]
 
@@ -125,7 +139,6 @@ function attachButtonListeners(marker: L.PopupEvent) {
           services: filtered.properties.services,
           location: filtered.geometry.coordinates
         }
-
         const busstopmarker = L.circleMarker([busstop.location[1], busstop.location[0]], { color }).addTo(map)
         busstopmarker.bindPopup(`<div>${busstop.name}<br><button>${busstop.services.join("</button><button>")}</button></div>`)
         busstopmarker.on("popupopen", attachButtonListeners)
@@ -141,7 +154,7 @@ function attachButtonListeners(marker: L.PopupEvent) {
   })
 }
 
-function cleanupMarkers(target: any) {
+function cleanupMarkers(target?: L.Layer) {
   map.eachLayer(layer => {
     if (layer instanceof L.CircleMarker && !allowedmarkers.includes(layer)) map.removeLayer(layer)
     if (layer != target) layer.unbindPopup()
